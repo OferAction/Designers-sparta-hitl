@@ -1,5 +1,5 @@
 import { CheckCircle2, AlertTriangle, ShieldAlert, Info, ClipboardList } from 'lucide-react';
-import { BellIcon as Bell, SunIcon as Sun, MoonIcon as Moon, ListIcon as List, FunnelIcon as Funnel, XIcon as X, CheckIcon as Check } from "@phosphor-icons/react";
+import { BellIcon as Bell, SunIcon as Sun, MoonIcon as Moon, ListIcon as List, FunnelIcon as Funnel, XIcon as X, CheckIcon as Check, CaretDownIcon as ChevronDown } from "@phosphor-icons/react";
 import { useHQTheme } from '@/hq/context';
 import { useSearchParams } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
@@ -11,10 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { HQNotification, NotificationKind } from '@/hq/types';
+import type { HQNotification, NotificationKind, SpartaRole } from '@/hq/types';
 import { useIsMobile } from '@/hq/hooks/useIsMobile';
 import logoDarkUrl from '@/assets/actionhq-logo-dark.svg';
 import logoLightUrl from '@/assets/actionhq-logo-light.svg';
+import spartanLogoUrl from '@/assets/spartan-logo.svg';
 import { workflowOverviews } from '@/hq/data/mockData';
 import { useHQRole } from '@/hq/context';
 
@@ -275,13 +276,7 @@ function MobileFilterDialog({ onClose }: { onClose: () => void }) {
         {/* Workflow */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Workflow</label>
-          <HQDropdown options={WORKFLOW_OPTIONS} paramKey="workflow" defaultValue="all" />
-        </div>
-
-        {/* Time range */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Time range</label>
-          <HQDropdown options={DATE_OPTIONS} paramKey="date" defaultValue="30d" />
+          <HQDropdown options={WORKFLOW_OPTIONS} paramKey="workflow" defaultValue="sparta-parcel" />
         </div>
 
         {/* Environment */}
@@ -324,11 +319,18 @@ interface TopBarProps {
 /** Top bar — desktop shows dropdowns + actions; mobile shows hamburger, logo, filter button */
 export default function HQTopBar({ onMenuOpen }: TopBarProps) {
   const { theme, toggle } = useHQTheme();
-  const { roleFilter } = useHQRole();
-  const avatarInitials = roleFilter === 'shipment-manager' ? 'SM' : 'IA';
+  const { roleFilter, setRoleFilter } = useHQRole();
+  const ROLE_INITIALS: Record<SpartaRole, string> = { approver: 'AP', 'shipment-manager': 'SM', requester: 'RE' };
+  const ROLE_LABELS: Record<SpartaRole, string> = { approver: 'Approver', 'shipment-manager': 'Shipment Manager', requester: 'Requester' };
+  const ROLE_COLORS: Record<SpartaRole, string> = { approver: '#2563EB', 'shipment-manager': '#374151', requester: '#16A34A' };
+  const ROLE_LIST: SpartaRole[] = ['approver', 'shipment-manager', 'requester'];
+  const avatarInitials = ROLE_INITIALS[roleFilter];
+  const avatarColor = ROLE_COLORS[roleFilter];
   const [notifOpen, setNotifOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const roleRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -337,10 +339,13 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotifOpen(false);
       }
+      if (roleRef.current && !roleRef.current.contains(e.target as Node)) {
+        setRoleMenuOpen(false);
+      }
     }
-    if (notifOpen) document.addEventListener('mousedown', handleClickOutside);
+    if (notifOpen || roleMenuOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [notifOpen]);
+  }, [notifOpen, roleMenuOpen]);
 
   /* ── Mobile top bar ── */
   if (isMobile) {
@@ -362,6 +367,7 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
                 className="w-full h-auto"
               />
             </div>
+            <img src={spartanLogoUrl} alt="Spartan" style={{ height: '22px', width: 'auto', marginLeft: '12px', flexShrink: 0 }} />
           </div>
 
           {/* Filter + avatar */}
@@ -372,9 +378,43 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
             >
               <Funnel size={18} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white text-xs font-semibold">
-              {avatarInitials}
-            </button>
+            <div ref={roleRef} className="relative group"
+              onMouseEnter={() => setRoleMenuOpen(true)}
+              onMouseLeave={() => setRoleMenuOpen(false)}
+            >
+              <div className="flex items-center gap-1 cursor-pointer rounded-full px-1 py-1 pr-0 group-hover:bg-muted transition-colors">
+                <div
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-white text-xs font-semibold flex-shrink-0"
+                  style={{ backgroundColor: avatarColor }}
+                >
+                  {avatarInitials}
+                </div>
+                <ChevronDown size={12} weight="bold" className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mr-1" />
+              </div>
+              {roleMenuOpen && (
+                <div className="absolute right-0 top-full pt-1 z-50">
+                  <div className="w-[220px] rounded-xl border border-border bg-card shadow-lg p-1.5">
+                  {ROLE_LIST.map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => { setRoleFilter(r); setRoleMenuOpen(false); }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                        roleFilter === r
+                          ? 'bg-muted text-foreground font-medium'
+                          : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="w-6 h-6 flex items-center justify-center rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: ROLE_COLORS[r] }}>{ROLE_INITIALS[r]}</span>
+                        {ROLE_LABELS[r]}
+                      </span>
+                      {roleFilter === r && <span className="w-1.5 h-1.5 rounded-full bg-purple-accent flex-shrink-0" />}
+                    </button>
+                  ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -391,6 +431,7 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
         alt="ActionHQ"
         style={{ height: '22px', width: 'auto', maxWidth: 'none', flexShrink: 0 }}
       />
+      <img src={spartanLogoUrl} alt="Spartan" style={{ height: '22px', width: 'auto', flexShrink: 0, marginLeft: '12px' }} />
       <div className="flex-1" />
       <div className="flex items-center gap-2">
         <span className="text-sm text-foreground/80">System health:</span>
@@ -400,8 +441,7 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
         </span>
       </div>
       <div className="w-px h-5 bg-border" />
-      <HQDropdown options={WORKFLOW_OPTIONS} paramKey="workflow" defaultValue="all" maxWidth="190px" />
-      <HQDropdown options={DATE_OPTIONS}     paramKey="date"     defaultValue="30d" />
+      <HQDropdown options={WORKFLOW_OPTIONS} paramKey="workflow" defaultValue="sparta-parcel" maxWidth="190px" />
 
       <div className="w-px h-5 bg-border" />
 
@@ -422,9 +462,43 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
         </button>
       </div>
 
-      <button className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white text-sm font-semibold">
-        {avatarInitials}
-      </button>
+      <div ref={roleRef} className="relative group"
+        onMouseEnter={() => setRoleMenuOpen(true)}
+        onMouseLeave={() => setRoleMenuOpen(false)}
+      >
+        <div className="flex items-center gap-1 cursor-pointer rounded-full px-1 py-1 pr-0 group-hover:bg-muted transition-colors">
+          <div
+            className="w-9 h-9 flex items-center justify-center rounded-full text-white text-sm font-semibold flex-shrink-0"
+            style={{ backgroundColor: avatarColor }}
+          >
+            {avatarInitials}
+          </div>
+          <ChevronDown size={12} weight="bold" className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mr-1" />
+        </div>
+        {roleMenuOpen && (
+          <div className="absolute right-0 top-full pt-1 z-50">
+            <div className="w-[220px] rounded-xl border border-border bg-card shadow-lg p-1.5">
+            {ROLE_LIST.map((r) => (
+              <button
+                key={r}
+                onClick={() => { setRoleFilter(r); setRoleMenuOpen(false); }}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                  roleFilter === r
+                    ? 'bg-muted text-foreground font-medium'
+                    : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="w-6 h-6 flex items-center justify-center rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: ROLE_COLORS[r] }}>{ROLE_INITIALS[r]}</span>
+                  {ROLE_LABELS[r]}
+                </span>
+                {roleFilter === r && <span className="w-1.5 h-1.5 rounded-full bg-purple-accent flex-shrink-0" />}
+              </button>
+            ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

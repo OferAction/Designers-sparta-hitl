@@ -38,13 +38,18 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 function FieldGrid({ rows }: { rows: { label: string; value: string }[] }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-      {rows.map(({ label, value }) => (
-        <div key={label}>
-          <p className="text-[11px] font-medium uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{label}</p>
-          <p className="text-sm leading-snug" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{value}</p>
-        </div>
-      ))}
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{ border: '1px solid var(--border-subtle)', background: 'hsl(var(--muted))' }}
+    >
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 px-3.5 py-3">
+        {rows.map(({ label, value }) => (
+          <div key={label}>
+            <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{label}</p>
+            <p className="text-sm leading-snug" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{value}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -58,27 +63,32 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
   // isGo → green  |  isNoGo → red  |  else → amber (caution)
 
   return (
-    <div className={`flex-1 overflow-y-auto ${px} pb-4 flex flex-col gap-5`}>
-      {/* Action Recommendation */}
-      <div>
-        <div className="sticky top-0 z-10 flex items-center gap-3 pt-4 pb-3" style={{ background: 'hsl(var(--general-primary-foreground))' }}>
-          <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>Action Recommendation</p>
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0 ${
-              isGo
-                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
-                : isNoGo
-                  ? 'bg-red-500/15 text-red-400 border border-red-500/25'
-                  : 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
-            }`}
-          >
-            {isGo
-              ? <CheckCircleIcon size={14} weight="fill" />
-              : <WarningCircleIcon size={14} weight="fill" />}
-            Accept
-          </span>
+    <div className={`flex-1 overflow-y-auto ${px} pb-4`}>
+      {/* Action Recommendation — sticky label */}
+      <div className="sticky top-0 z-10 flex items-center gap-3 pt-4 pb-3" style={{ background: 'hsl(var(--general-primary-foreground))' }}>
+        <p className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>Action Recommendation</p>
+        <span
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0 ${
+            isGo
+              ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-400/50'
+              : isNoGo
+                ? 'bg-red-100 text-red-700 border border-red-300 dark:bg-red-500/25 dark:text-red-300 dark:border-red-400/50'
+                : 'bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/25 dark:text-amber-300 dark:border-amber-400/50'
+          }`}
+        >
+          {isGo
+            ? <CheckCircleIcon size={14} weight="fill" />
+            : <WarningCircleIcon size={14} weight="fill" />}
+          Accept
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-5">
+      {/* Recommendation reason */}
+      <div className="rounded-xl p-[1px]" style={{ background: 'linear-gradient(135deg, #3B82F6, #A855F7)' }}>
+        <div className="rounded-xl p-3.5" style={{ background: 'hsl(var(--muted))' }}>
+          <p className="text-sm leading-snug" style={{ color: 'hsl(var(--foreground) / 0.85)' }}>{d.recommendation.reason}</p>
         </div>
-        <p className="text-sm leading-snug" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{d.recommendation.reason}</p>
       </div>
 
       {/* Shipment Details */}
@@ -121,7 +131,7 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
               style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)' }}
             >
               <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] font-medium" style={{ color: 'hsl(var(--foreground) / 0.55)' }}>
+                <p className="text-[11px] font-medium" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
                   {i === 0 ? 'Event' : 'Annual'} — {b.name}
                 </p>
                 <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{b.pct}%</span>
@@ -162,12 +172,13 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
                   borderBottom: i < 2 ? '1px solid var(--border-subtle)' : 'none',
                 }}
               >
-                <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{label}</p>
+                <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{label}</p>
                 <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{value}</p>
               </div>
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -184,34 +195,39 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
   const ba = rec.budgetAnalysis ?? {};
 
   return (
-    <div className={`flex-1 overflow-y-auto ${px} pb-4 flex flex-col gap-5`}>
-      {/* Action Recommendation */}
-      <div>
-        <div className="sticky top-0 z-10 flex items-center gap-3 pt-4 pb-3" style={{ background: 'hsl(var(--general-primary-foreground))' }}>
-          <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>Action Recommendation</p>
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0 ${
-              isGo
-                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
-                : isNoGo
-                  ? 'bg-red-500/15 text-red-400 border border-red-500/25'
-                  : 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
-            }`}
-          >
-            {isGo
-              ? <CheckCircleIcon size={14} weight="fill" />
-              : <WarningCircleIcon size={14} weight="fill" />}
-            Accept
-          </span>
-        </div>
-        <p className="text-sm leading-snug" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
-          {r?.summary ?? ''}
-        </p>
-        {r?.approvalLevel && (
-          <p className="text-xs mt-2" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>
-            Required approval: {r.approvalLevel}
+    <div className={`flex-1 overflow-y-auto ${px} pb-4`}>
+      {/* Action Recommendation — sticky label */}
+      <div className="sticky top-0 z-10 flex items-center gap-3 pt-4 pb-3" style={{ background: 'hsl(var(--general-primary-foreground))' }}>
+        <p className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>Action Recommendation</p>
+        <span
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0 ${
+            isGo
+              ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-400/50'
+              : isNoGo
+                ? 'bg-red-100 text-red-700 border border-red-300 dark:bg-red-500/25 dark:text-red-300 dark:border-red-400/50'
+                : 'bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/25 dark:text-amber-300 dark:border-amber-400/50'
+          }`}
+        >
+          {isGo
+            ? <CheckCircleIcon size={14} weight="fill" />
+            : <WarningCircleIcon size={14} weight="fill" />}
+          Accept
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-5">
+      {/* Recommendation details */}
+      <div className="rounded-xl p-[1px]" style={{ background: 'linear-gradient(135deg, #3B82F6, #A855F7)' }}>
+        <div className="rounded-xl p-3.5" style={{ background: 'hsl(var(--muted))' }}>
+          <p className="text-sm leading-snug" style={{ color: 'hsl(var(--foreground) / 0.85)' }}>
+            {r?.summary ?? ''}
           </p>
-        )}
+          {r?.approvalLevel && (
+            <p className="text-xs mt-2" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>
+              Required approval: {r.approvalLevel}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Shipment Details */}
@@ -251,19 +267,19 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
         >
           <div className="grid grid-cols-2 gap-x-4 gap-y-3 px-3.5 py-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Service</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Service</p>
               <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{svc.serviceName ?? '—'}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Total Cost</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Total Cost</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(svc.totalNetCharge)} {svc.currency ?? ''}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Base + Surcharges</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Base + Surcharges</p>
               <p className="text-sm" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>${fmt(svc.baseCharge)} + ${fmt(svc.surcharges)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Billed Weight</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Billed Weight</p>
               <p className="text-sm" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
                 {svc.billedWeight ?? '—'} lbs {svc.ratedByDim ? '(DIM)' : ''}
               </p>
@@ -281,32 +297,33 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
         >
           <div className="grid grid-cols-2 gap-x-4 gap-y-3 px-3.5 py-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Event</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Event</p>
               <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{ba.eventName ?? '—'} ({ba.eventCode ?? ''})</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Department</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Department</p>
               <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{ba.deptName ?? '—'}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Dept Budget</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Dept Budget</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(ba.deptBudget)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Remaining</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Remaining</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(ba.remaining)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>Utilization</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Utilization</p>
               <p className="text-sm" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{ba.utilization ?? 0}%</p>
               <BudgetBar pct={ba.utilization ?? 0} />
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>GL Code</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>GL Code</p>
               <p className="text-sm" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{ba.glCode ?? '—'}</p>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -347,7 +364,7 @@ function ShipmentManagerPanel({ review, px, mobile }: { review: ReviewRequest; p
         >
           <div className="grid grid-cols-4 px-3.5 py-2.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
             {['Invoice #', 'Invoiced', 'Estimated', 'Variance'].map((h) => (
-              <p key={h} className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{h}</p>
+              <p key={h} className="text-[12px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{h}</p>
             ))}
           </div>
           <div className="grid grid-cols-4 px-3.5 py-2.5">
@@ -494,32 +511,36 @@ export default function SpartaParcelDetailPanel({ review, currentUser, width = 3
         style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-muted-50)' }}
       >
         {canAct && role === 'approver' ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onApprove?.(review)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-purple-accent hover:bg-purple-accent/85 text-white`}
-            >
-              <CheckIcon size={16} weight="bold" />
-              Accept
-            </button>
+          <div className="flex items-center justify-end gap-3">
             <button
               onClick={() => onReject?.(review)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'}`}
-              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)' }}
+              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} hover:bg-red-100 hover:text-red-700 hover:border-red-300 dark:hover:bg-red-500/20 dark:hover:text-red-300 dark:hover:border-red-400/50`}
+              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)', width: 200, minWidth: 100 }}
             >
               <XIcon size={16} weight="bold" />
               Reject
             </button>
+            <button
+              onClick={() => onApprove?.(review)}
+              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-purple-accent hover:bg-purple-accent/85 text-white`}
+              style={{ width: 200, minWidth: 100 }}
+            >
+              <CheckIcon size={16} weight="bold" />
+              Accept
+            </button>
           </div>
         ) : canAct && role === 'shipment-manager' ? (
-          <div className="flex items-center gap-3">
-            <button className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-blue-600 hover:bg-blue-700 text-white`}>
+          <div className="flex items-center justify-end gap-3">
+            <button
+              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-blue-600 hover:bg-blue-700 text-white`}
+              style={{ width: 200, minWidth: 100 }}
+            >
               <CheckIcon size={16} weight="bold" />
               Send to AP
             </button>
             <button
-              className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'}`}
-              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)' }}
+              className={`flex-shrink px-4 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'}`}
+              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)', width: 200, minWidth: 100 }}
             >
               Flag for review
             </button>

@@ -76,45 +76,75 @@ const STATIC_REVIEWS = [...reviewRequests, ...spartaReviewRequests];
 type Tab = 'mine' | 'all' | 'approval-status';
 type Toast = { id: string; message: string; nextId: string | null; undo: () => void; commit: () => void };
 
-function RoleDropdown({ value, onChange }: { value: SpartaRole; onChange: (v: SpartaRole) => void }) {
+const STATUS_FILTER_OPTIONS_QUICK: { value: string; label: string }[] = [
+  { value: 'Pending',  label: 'Pending' },
+  { value: 'Approved', label: 'Approved' },
+  { value: 'Declined', label: 'Declined' },
+];
+
+function StatusMultiSelect({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const [open, setOpen] = useState(false);
-  const label = ROLE_OPTIONS.find((o) => o.value === value)?.label ?? 'Role';
+  const allSelected = value.length === 0;
+  const label = allSelected
+    ? 'All Statuses'
+    : value.length === 1
+      ? value[0]
+      : `${value.length} statuses`;
+
+  function toggle(status: string) {
+    if (value.includes(status)) {
+      onChange(value.filter((v) => v !== status));
+    } else {
+      onChange([...value, status]);
+    }
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className={`flex items-center h-9 gap-2 px-3.5 rounded-lg border text-sm font-medium transition-colors bg-card text-foreground ${
+          className={`flex items-center h-8 gap-2 px-3 rounded-lg border text-xs font-medium transition-colors bg-card text-foreground ${
             open ? 'border-ring' : 'border-border hover:border-ring'
           }`}
         >
           {label}
-          <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
       </PopoverTrigger>
       <PopoverContent
-        disablePortal
-        align="end"
+        align="start"
         sideOffset={6}
-        className="w-auto min-w-[180px] p-1.5 rounded-xl border-border bg-card"
+        className="w-auto min-w-[160px] p-1.5 rounded-xl border-border bg-card"
       >
         <div className="flex flex-col">
-          {ROLE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                value === opt.value
-                  ? 'bg-muted text-foreground font-medium'
-                  : 'text-foreground/80 hover:bg-muted hover:text-foreground'
-              }`}
-            >
-              {opt.label}
-              {value === opt.value && (
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-accent flex-shrink-0" />
-              )}
-            </button>
-          ))}
+          <button
+            onClick={() => onChange([])}
+            className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+              allSelected
+                ? 'bg-muted text-foreground font-medium'
+                : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+            }`}
+          >
+            All Statuses
+            {allSelected && <span className="w-1.5 h-1.5 rounded-full bg-purple-accent flex-shrink-0" />}
+          </button>
+          {STATUS_FILTER_OPTIONS_QUICK.map((opt) => {
+            const checked = value.includes(opt.value);
+            return (
+              <button
+                key={opt.value}
+                onClick={() => toggle(opt.value)}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                  checked
+                    ? 'bg-muted text-foreground font-medium'
+                    : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                {opt.label}
+                {checked && <span className="w-1.5 h-1.5 rounded-full bg-purple-accent flex-shrink-0" />}
+              </button>
+            );
+          })}
         </div>
       </PopoverContent>
     </Popover>
@@ -130,6 +160,7 @@ export default function HQReviewsPage() {
   const { actoneOpen } = useHQActOne();
   const { roleFilter, setRoleFilter } = useHQRole();
   const [statusFilter] = useState<string[]>(STATUS_OPTIONS.map((o) => o.value));
+  const [statusQuickFilter, setStatusQuickFilter] = useState<string[]>([]);
   const pendingBadge = theme === 'light'
     ? 'bg-amber-100 text-amber-700 border-amber-300'
     : 'bg-amber-500/15 text-amber-400 border-amber-500/25';
@@ -174,7 +205,7 @@ export default function HQReviewsPage() {
     return sortReviews([...approvalStatusRequests, ...approvalStatusLive]);
   }, [roleFilter, approvalStatusLive]);
 
-  const [tab, setTab] = useState<Tab>('mine');
+  const [tab, setTab] = useState<Tab>('all');
 
   // currentUser is role-aware: Ian (id u-1) for approver, Shipping Manager for SM, Requester for requester
   const currentUser = roleFilter === 'approver' ? REVIEWER_IAN : roleFilter === 'requester' ? REVIEWER_REQ : REVIEWER_SM;
@@ -200,10 +231,11 @@ export default function HQReviewsPage() {
     }
     const filtered = base.filter((r) =>
       (r.spartaRole == null || r.spartaRole === roleFilter) &&
-      statusFilter.includes(r.status)
+      statusFilter.includes(r.status) &&
+      (statusQuickFilter.length === 0 || statusQuickFilter.includes(r.status))
     );
     return sortReviews(filtered);
-  }, [reviews, workflowFilter, roleFilter, statusFilter]);
+  }, [reviews, workflowFilter, roleFilter, statusFilter, statusQuickFilter]);
 
   const mineReviews = useMemo(
     () => workflowFiltered.filter((r) => r.assignedTo.id === currentUser.id),
@@ -319,7 +351,7 @@ export default function HQReviewsPage() {
     if (roleFilter === 'requester') {
       /* Approval Status tab shows the budget recommendation column */
       if (tab === 'approval-status') return { reasonLabel: 'Recommendation', sentLabel: 'Submitted' };
-      return { reasonLabel: null, sentLabel: 'Processed' };
+      return { reasonLabel: null, sentLabel: 'Reason' };
     }
     // shipment-manager: hide reason column, rename sent
     return { reasonLabel: null, sentLabel: 'Submitted' };
@@ -469,89 +501,44 @@ export default function HQReviewsPage() {
         ))}
       </div>
 
-      <h2 className="text-lg leading-7 font-medium text-foreground flex-shrink-0">HITL Requests</h2>
-
-      {/* Tabs + filters row */}
-      <div className="flex items-center justify-between flex-shrink-0">
-        <div className={`flex items-center ${!isMobile ? 'border-b border-border' : ''}`}>
-          <button
-            onClick={() => setTab('mine')}
-            className={`flex items-center gap-2 px-1 py-2 mr-6 text-sm font-medium border-b-2 transition-colors ${
-              tab === 'mine' ? 'border-foreground text-foreground' : 'border-transparent text-ring hover:text-foreground'
-            }`}
-          >
-            {isMobile ? 'Mine' : 'Assigned to me'}
-            {typeof pendingCount === 'number' && pendingCount > 0 && (
-              <span className={`text-xs font-semibold px-1.5 py-px rounded-full border ${pendingBadge}`}>
-                {pendingCount}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setTab('all')}
-            className={`px-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-              tab === 'all' ? 'border-foreground text-foreground' : 'border-transparent text-ring hover:text-foreground'
-            }`}
-          >
-            All reviewers
-          </button>
-          {roleFilter === 'requester' && isSparta && (
-            <button
-              onClick={() => setTab('approval-status')}
-              className={`ml-6 flex items-center gap-2 px-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                tab === 'approval-status' ? 'border-foreground text-foreground' : 'border-transparent text-ring hover:text-foreground'
-              }`}
-            >
-              {isMobile ? 'Approvals' : 'Approval Status'}
-              {approvalStatusReviews.filter((r) => r.status === 'Pending').length > 0 && (
-                <span className={`text-xs font-semibold px-1.5 py-px rounded-full border ${pendingBadge}`}>
-                  {approvalStatusReviews.filter((r) => r.status === 'Pending').length}
-                </span>
-              )}
-            </button>
-          )}
-        </div>
+      <div className="flex items-center flex-shrink-0 mt-2 mb-2" style={{ gap: '24px' }}>
+        <h2 className="text-lg leading-7 font-medium text-foreground">Approval Requests</h2>
         {!isMobile && (
-          <div className="flex items-center gap-2">
-            <RoleDropdown value={roleFilter} onChange={setRoleFilter} />
+          <>
+            <div className="w-px h-5 bg-border" />
+            <StatusMultiSelect value={statusQuickFilter} onChange={setStatusQuickFilter} />
+          </>
+        )}
+        <div className="flex-1" />
+        {roleFilter === 'requester' && processedLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Loading shipment data…
+          </div>
+        )}
+        {roleFilter === 'requester' && processedError && (
+          <div className="text-sm text-destructive">
+            Failed to load processed shipments. Retrying…
+          </div>
+        )}
+        {roleFilter === 'requester' && tab === 'approval-status' && approvalStatusLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Loading approval status…
+          </div>
+        )}
+        {roleFilter === 'requester' && tab === 'approval-status' && approvalStatusError && (
+          <div className="text-sm text-destructive">
+            Failed to load approval status. Retrying…
+          </div>
+        )}
+        {roleFilter === 'approver' && approverLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Loading recommendations…
           </div>
         )}
       </div>
-
-      {/* Loading / error state for live data */}
-      {roleFilter === 'requester' && processedLoading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
-          <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          Loading shipment data…
-        </div>
-      )}
-      {roleFilter === 'requester' && processedError && (
-        <div className="text-sm text-destructive px-1">
-          Failed to load processed shipments. Retrying…
-        </div>
-      )}
-      {roleFilter === 'requester' && tab === 'approval-status' && approvalStatusLoading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
-          <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          Loading approval status…
-        </div>
-      )}
-      {roleFilter === 'requester' && tab === 'approval-status' && approvalStatusError && (
-        <div className="text-sm text-destructive px-1">
-          Failed to load approval status. Retrying…
-        </div>
-      )}
-      {roleFilter === 'approver' && approverLoading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
-          <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          Loading recommendations…
-        </div>
-      )}
-      {roleFilter === 'approver' && approverError && (
-        <div className="text-sm text-destructive px-1">
-          Failed to load recommendations. Retrying…
-        </div>
-      )}
 
       {isMobile ? (
         <div className="flex flex-col flex-1 min-h-0 -mt-[8px]">

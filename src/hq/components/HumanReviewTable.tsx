@@ -40,9 +40,9 @@ const BASE_COLS_DEFAULT: Col[] = [
   { key: 'status',   label: 'Status',        defaultWidth: 130 },
   { key: 'reason',   label: 'Reason',        defaultWidth: 130 },
   { key: 'sent',     label: 'Sent to review', defaultWidth: 130 },
-  { key: 'reqId',    label: 'ID',            defaultWidth: 130 },
+  { key: 'reqId',    label: 'Trigger Date',  defaultWidth: 130 },
 ];
-const ASSIGNEE_COL: Col = { key: 'assignee', label: 'Assigned to', defaultWidth: 130 };
+const ASSIGNEE_COL: Col = { key: 'assignee', label: 'ID', defaultWidth: 130 };
 
 const COL_SORT_KEY: Record<string, (r: ReviewRequest) => string> = {
   status:   (r) => r.status,
@@ -226,10 +226,17 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, showAs
     onFilteredChange?.(groups.flatMap((g) => g.items));
   }, [groups, onFilteredChange]);
 
-  const gridTemplate = useMemo(
-    () => widths.map((w) => `${w}px`).join(' '),
-    [widths],
-  );
+  const gridTemplate = useMemo(() => {
+    if (containerWidth === 0) return widths.map(() => '1fr').join(' ');
+    const STATUS_WIDTH = 130;
+    const remaining = containerWidth - STATUS_WIDTH;
+    const nonStatusCount = widths.length - 1;
+    return widths.map((w, i) => {
+      if (i === 0) return `${STATUS_WIDTH}px`;
+      if (manualWidths.has(i)) return `${w}px`;
+      return `${Math.max(MIN_COL_WIDTH, Math.floor(remaining / nonStatusCount))}px`;
+    }).join(' ');
+  }, [widths, manualWidths, containerWidth]);
 
   useEffect(() => {
     if (!activeId || !scrollRef.current) return;
@@ -304,10 +311,10 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, showAs
             <div
               key={col.key}
               onClick={() => handleSort(col.key)}
-              className="relative flex items-center gap-1 overflow-visible cursor-pointer select-none group/col"
+              className="relative flex items-center gap-1 overflow-hidden cursor-pointer select-none group/col"
             >
               <span
-                className={`text-xs text-foreground/80 font-semibold uppercase tracking-widest whitespace-nowrap ${i > 0 ? 'pl-3' : ''} ${i < COLS.length - 1 ? 'pr-3' : ''}`}
+                className={`text-xs text-foreground/80 font-semibold uppercase tracking-widest truncate ${i > 0 ? 'pl-3' : ''} ${i < COLS.length - 1 ? 'pr-3' : ''}`}
               >
                 {col.label}
               </span>
@@ -348,19 +355,9 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, showAs
             </div>
           </div>
         ) : (
-          groups.map((group) => (
-            <div key={group.id} className="relative z-0">
-              <div className="sticky top-0 z-10 flex items-center gap-2 px-5 h-9 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'hsl(var(--background))' }}>
-                <span className="text-[10px] text-foreground/80 font-semibold tracking-widest uppercase whitespace-nowrap">
-                  {group.name}
-                </span>
-                <EnvBadge env={group.env} />
-              </div>
-
-              {group.items.map((rev) => (
-                (() => {
-                  const reviewLabel = hasReviewContent(rev) ? getReviewContent(rev).tag : rev.reason;
-                  return (
+          groups.flatMap((group) => group.items).map((rev) => {
+              const reviewLabel = hasReviewContent(rev) ? getReviewContent(rev).tag : rev.reason;
+              return (
                 <div
                   key={rev.id}
                   data-row-id={rev.id}
@@ -416,11 +413,8 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, showAs
                     </div>
                   )}
                 </div>
-                  );
-                })()
-              ))}
-            </div>
-          ))
+              );
+          })
         )}
       </div>
     </div>

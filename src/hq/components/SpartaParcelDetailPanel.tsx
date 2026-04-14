@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { ReviewRequest, Reviewer, ApproverRecommendation } from '@/hq/types';
-import { ArrowLeftIcon as ArrowLeft, CheckIcon, XIcon, CheckCircleIcon, WarningCircleIcon, FileTextIcon, PencilSimpleIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon as ArrowLeft, CheckIcon, XIcon, FlagIcon, CheckCircleIcon, WarningCircleIcon, FileTextIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import StatusBadge from './StatusBadge';
 
 interface Props {
@@ -532,17 +532,18 @@ export default function SpartaParcelDetailPanel({ review, currentUser, width = 3
         ) : canAct && role === 'shipment-manager' ? (
           <div className="flex items-center justify-end gap-3">
             <button
-              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-blue-600 hover:bg-blue-700 text-white`}
+              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} hover:bg-red-100 hover:text-red-700 hover:border-red-300 dark:hover:bg-red-500/20 dark:hover:text-red-300 dark:hover:border-red-400/50`}
+              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)', width: 200, minWidth: 100 }}
+            >
+              <FlagIcon size={16} weight="bold" />
+              Flag for review
+            </button>
+            <button
+              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-purple-accent hover:bg-purple-accent/85 text-white`}
               style={{ width: 200, minWidth: 100 }}
             >
               <CheckIcon size={16} weight="bold" />
               Send to AP
-            </button>
-            <button
-              className={`flex-shrink px-4 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'}`}
-              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)', width: 200, minWidth: 100 }}
-            >
-              Flag for review
             </button>
           </div>
         ) : (

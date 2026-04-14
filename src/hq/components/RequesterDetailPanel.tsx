@@ -9,6 +9,7 @@ import {
   PackageIcon,
   TruckIcon,
   WarningCircleIcon,
+  XIcon,
 } from '@phosphor-icons/react';
 
 import StatusBadge from './StatusBadge';
@@ -349,20 +350,22 @@ export default function RequesterDetailPanel({ review, currentUser, width = 320,
         style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-muted-50)' }}
       >
         {canAct ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end gap-3">
+            <button
+              onClick={handleDiscard}
+              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} hover:bg-red-100 hover:text-red-700 hover:border-red-300 dark:hover:bg-red-500/20 dark:hover:text-red-300 dark:hover:border-red-400/50`}
+              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)', width: 200, minWidth: 100 }}
+            >
+              <XIcon size={16} weight="bold" />
+              Discard
+            </button>
             <button
               onClick={handleSubmit}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-purple-accent hover:bg-purple-accent/85 text-white`}
+              className={`flex-shrink flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'} bg-purple-accent hover:bg-purple-accent/85 text-white`}
+              style={{ width: 200, minWidth: 100 }}
             >
               <CheckIcon size={16} weight="bold" />
               Submit
-            </button>
-            <button
-              onClick={handleDiscard}
-              className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-semibold transition-colors ${mobile ? 'text-[13px]' : 'text-sm'}`}
-              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)', color: 'hsl(var(--foreground) / 0.8)' }}
-            >
-              Discard
             </button>
           </div>
         ) : (

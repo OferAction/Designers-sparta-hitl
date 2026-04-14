@@ -546,7 +546,6 @@ export default function HQReviewsPage() {
             reviews={visibleReviews}
             selectedId={syncedSelected?.id ?? null}
             onSelect={handleSelect}
-            showAssignee={tab === 'all'}
             colOverrides={colOverrides}
             compact
           />
@@ -579,7 +578,6 @@ export default function HQReviewsPage() {
             reviews={visibleReviews}
             selectedId={syncedSelected?.id ?? null}
             onSelect={setSelected}
-            showAssignee={tab === 'all'}
             colOverrides={colOverrides}
           />
           <div

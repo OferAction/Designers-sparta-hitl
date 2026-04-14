@@ -17,7 +17,6 @@ interface Props {
   reviews: ReviewRequest[];
   selectedId: string | null;
   onSelect: (review: ReviewRequest) => void;
-  showAssignee?: boolean;
   onFilteredChange?: (rows: ReviewRequest[]) => void;
   compact?: boolean;
   colOverrides?: ColOverrides;
@@ -40,16 +39,14 @@ const BASE_COLS_DEFAULT: Col[] = [
   { key: 'status',   label: 'Status',        defaultWidth: 130 },
   { key: 'reason',   label: 'Reason',        defaultWidth: 130 },
   { key: 'sent',     label: 'Sent to review', defaultWidth: 130 },
-  { key: 'reqId',    label: 'Trigger Date',  defaultWidth: 130 },
+  { key: 'reqId',    label: 'ID',            defaultWidth: 130 },
 ];
-const ASSIGNEE_COL: Col = { key: 'assignee', label: 'ID', defaultWidth: 130 };
 
 const COL_SORT_KEY: Record<string, (r: ReviewRequest) => string> = {
   status:   (r) => r.status,
   reason:   (r) => r.reason,
   sent:     (r) => r.sentToReview,
   reqId:    (r) => r.reqId,
-  assignee: (r) => r.assignedTo.name,
 };
 
 const STATUS_OPTIONS: { value: ReviewStatus; label: string }[] = [
@@ -136,7 +133,7 @@ function EnvBadge({ env }: { env: WorkflowEnvironment }) {
 // suppress unused import warning
 void formatTimestamp;
 
-export default function HumanReviewTable({ reviews, selectedId, onSelect, showAssignee = false, onFilteredChange, compact = false, colOverrides }: Props) {
+export default function HumanReviewTable({ reviews, selectedId, onSelect, onFilteredChange, compact = false, colOverrides }: Props) {
   useHQTheme();
   const COLS = useMemo<Col[]>(() => {
     const base: Col[] = BASE_COLS_DEFAULT
@@ -146,8 +143,8 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, showAs
         if (c.key === 'sent'   && colOverrides?.sentLabel   != null) return { ...c, label: colOverrides.sentLabel };
         return c;
       });
-    return showAssignee ? [...base, ASSIGNEE_COL] : base;
-  }, [showAssignee, colOverrides]);
+    return base;
+  }, [colOverrides]);
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -383,9 +380,6 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, showAs
                         <span className="truncate min-w-0">{rev.sentToReview}</span>
                         <span className="flex-shrink-0 w-20 text-center tabular-nums">{rev.reqId}</span>
                       </div>
-                      {showAssignee && (
-                        <span className="text-xs text-foreground/80 truncate">{rev.assignedTo.name}</span>
-                      )}
                     </div>
                   ) : (
                     /* Desktop grid row */
@@ -405,11 +399,6 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, showAs
                       <div className="flex items-center pl-3 overflow-hidden">
                         <span className="text-sm text-foreground/80 tabular-nums font-medium truncate" title={rev.reqId}>{rev.reqId}</span>
                       </div>
-                      {showAssignee && (
-                        <div className="flex items-center pl-3 overflow-hidden">
-                          <span className="text-sm text-foreground/80 truncate" title={rev.assignedTo.name}>{rev.assignedTo.name}</span>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>

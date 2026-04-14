@@ -64,9 +64,9 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
 
   return (
     <div className={`flex-1 overflow-y-auto ${px} pb-4`}>
-      {/* Action Recommendation — sticky label */}
+      {/* AI Recommendation — sticky label */}
       <div className="sticky top-0 z-10 flex items-center gap-3 pt-4 pb-3" style={{ background: 'hsl(var(--general-primary-foreground))' }}>
-        <p className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>Action Recommendation</p>
+        <p className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>AI Recommendation:</p>
         <span
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0 ${
             isGo
@@ -196,9 +196,9 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
 
   return (
     <div className={`flex-1 overflow-y-auto ${px} pb-4`}>
-      {/* Action Recommendation — sticky label */}
+      {/* AI Recommendation — sticky label */}
       <div className="sticky top-0 z-10 flex items-center gap-3 pt-4 pb-3" style={{ background: 'hsl(var(--general-primary-foreground))' }}>
-        <p className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>Action Recommendation</p>
+        <p className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>AI Recommendation:</p>
         <span
           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0 ${
             isGo

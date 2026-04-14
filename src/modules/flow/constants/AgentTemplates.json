@@ -1,0 +1,296 @@
+{
+  "start": {
+    "id": "b1e7f2a8-1e7b-4e2e-9a7d-1f2e3c4b5a6d",
+    "type": "start",
+    "data": {
+      "name": "start",
+      "type": "start",
+      "title": "Start",
+      "subtitle": "Start Node Operator",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "end": {
+    "id": "e2c9d3b4-5f6a-4b7c-8d9e-2a3b4c5d6e7f",
+    "type": "end",
+    "data": {
+      "name": "end",
+      "type": "end",
+      "title": "End",
+      "subtitle": "End of the orchestration",
+      "save_result": false,
+      "description": "",
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "ifelse": {
+    "id": "a3d4e5f6-7b8c-4d9e-8f7a-1b2c3d4e5f6a",
+    "type": "ifelse",
+    "data": {
+      "name": "ifelse",
+      "type": "ifelse",
+      "title": "If Else",
+      "subtitle": "Conditional logic Operator",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": [],
+      "conditions": [
+        {
+          "type": "if",
+          "values": [
+            {
+              "value": "",
+              "type": "",
+              "path": [],
+              "isReference": false
+            }
+          ]
+        },
+        {
+          "type": "else",
+          "values": [
+            {
+              "path": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "regexBinaryClassifier": {
+    "id": "c4b5a6d7-8e9f-4a1b-2c3d-4e5f6a7b8c9d",
+    "type": "agent",
+    "data": {
+      "name": "regexBinaryClassifier",
+      "type": "agent",
+      "title": "Regex Binary Classifier",
+      "subtitle": "Classifies if the input text some regex patterns",
+      "save_result": false,
+      "description": "",
+      "inputs": [
+        {
+          "id": "0",
+          "label": "text to classify",
+          "render_type": "dropdown",
+          "value_type": "String",
+          "value": null,
+          "configType": "call_kwargs",
+          "options": []
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Classification",
+          "id": "classification",
+          "type": "String"
+        }
+      ]
+    }
+  },
+  "regexMultiLabelClassifier": {
+    "id": "d5e6f7a8-9b0c-4d1e-2f3a-4b5c6d7e8f9a",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "regexMultiLabelClassifier",
+      "title": "Regex Multi Label Classifier",
+      "subtitle": "Multi-label classification using regular expressions.",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "labels",
+          "label": "Labels",
+          "type": "List"
+        }
+      ]
+    }
+  },
+  "regexMultiClassClassifier": {
+    "id": "e6f7a8b9-0c1d-4e2f-3a4b-5c6d7e8f9a0b",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "regexMultiClassClassifier",
+      "title": "Regex Multi Class Classifier",
+      "subtitle": "Multi-class classification using regular expressions.",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "classification",
+          "label": "Classification",
+          "type": "String"
+        }
+      ]
+    }
+  },
+  "ocrAgent": {
+    "id": "f7a8b9c0-1d2e-4f3a-5b6c-7d8e9f0a1b2c",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "ocrAgent",
+      "title": "OCR Agent",
+      "subtitle": "Extracts text from PDF files using OCR",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "formattingAgent": {
+    "id": "a8b9c0d1-2e3f-4a5b-6c7d-8e9f0a1b2c3d",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "formattingAgent",
+      "title": "Formatting Agent",
+      "subtitle": "Formats the input data into the specified data scheme",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "mappingAgent": {
+    "id": "b9c0d1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "mappingAgent",
+      "title": "Mapping Agent",
+      "subtitle": "Gets the corresponding value from the mapping based on the key",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "llmAgent": {
+    "id": "c0d1e2f3-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "llmAgent",
+      "title": "LLM",
+      "subtitle": "interacting with large language models using specified model providers",
+      "description": "",
+      "save_result": false,
+      "messages": [],
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "customCodeAgent": {
+    "id": "d1e2f3a4-5b6c-7d8e-9f0a-1b2c3d4e5f6a",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "customCodeAgent",
+      "title": "Custom Code Agent",
+      "subtitle": "Handles custom code execution",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "iterator": {
+    "id": "e2f3a4b5-6c7d-8e9f-0a1b-2c3d4e5f6a7b",
+    "type": "iterator",
+    "data": {
+      "type": "iterator",
+      "name": "iterator",
+      "title": "Iterator",
+      "subtitle": "Iterates over a dataset",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "aggregator": {
+    "id": "f3a4b5c6-7d8e-9f0a-1b2c-3d4e5f6a7b8c",
+    "type": "aggregator",
+    "data": {
+      "type": "aggregator",
+      "name": "aggregator",
+      "title": "Aggregator",
+      "subtitle": "Aggregates results from multiple inputs",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "APIAgent": {
+    "id": "a4b5c6d7-8e9f-0a1b-2c3d-4e5f6a7b8c9d",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "APIAgent",
+      "title": "API Agent",
+      "subtitle": "Fetches data from the specified API endpoint",
+      "description": "",
+      "save_result": false,
+      "inputs": {
+        "url": "",
+        "method": "GET",
+        "headers": [{ "key": "", "value": "" }],
+        "params": [{ "key": "", "value": "" }],
+        "data": {}
+      },
+      "outputs": []
+    }
+  },
+  "TrOCRAgent": {
+    "id": "b5c6d7e8-9f0a-1b2c-3d4e-5f6a7b8c9d0e",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "TrOCRAgent",
+      "title": "TrOCR Agent",
+      "subtitle": "Loads vision encoder-decoder models",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "VITClassifier": {
+    "id": "c6d7e8f9-0a1b-2c3d-4e5f-6a7b8c9d0e1f",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "VITClassifier",
+      "title": "VIT Classifier",
+      "subtitle": "A transformer-based image classification agent",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "YOLOAgent": {
+    "id": "d7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f2a",
+    "type": "agent",
+    "data": {
+      "type": "agent",
+      "name": "YOLOAgent",
+      "title": "YOLO Agent",
+      "subtitle": "Enables object detection and classification using Ultralytics YOLO",
+      "description": "",
+      "save_result": false,
+      "inputs": [],
+      "outputs": []
+    }
+  }
+}

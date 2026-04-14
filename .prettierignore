@@ -1,0 +1,11 @@
+# Build artifacts
+build
+dist
+coverage
+
+# Dependencies
+node_modules
+
+# Other files
+.DS_Store
+.env

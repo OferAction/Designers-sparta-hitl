@@ -1,0 +1,472 @@
+# =============================================================================
+# Platform Portal - CI/CD Pipeline
+# =============================================================================
+# This workflow handles the complete CI/CD process with TWO PARALLEL PATHS:
+#
+# PATH 1 - DEPLOY (Fast Track):
+#   setup --> build_and_push --> deploy
+#
+# PATH 2 - SCANS & REPORTS (Quality Assurance):
+#   setup --> code_quality_analysis (SonarQube)
+#   setup --> build_and_push --> security_scan (Trivy)
+#
+# CONVERGENCE:
+#   Both paths --> notify (Teams notification)
+#
+# Pipeline Visualization:
+#
+#               ┌──> code_quality_analysis ──────────────────────────┐
+#               │                                                    │
+#   setup ──────┤                                                    ├──> notify
+#               │                                                    │
+#               └──> build_and_push ──┬──> security_scan ────────────┤
+#                                     │                              │
+#                                     └──> deploy ───────────────────┘
+#
+# Supported Environments: dev, staging, uat, prod
+# =============================================================================
+
+name: "Platform Portal - Build & Deploy"
+
+# =============================================================================
+# TRIGGER CONFIGURATION
+# =============================================================================
+on:
+  push:
+    branches:
+      - dev
+      - staging
+      - uat
+      - prod
+
+# =============================================================================
+# JOBS
+# =============================================================================
+jobs:
+  # ===========================================================================
+  # JOB 1: SETUP - Determine Environment Configuration
+  # ===========================================================================
+  setup:
+    name: "Setup Environment"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    outputs:
+      # Environment identifiers
+      environment: ${{ steps.config.outputs.environment }}
+      environment_short: ${{ steps.config.outputs.environment_short }}
+      SUBSCRIPTION_ID: ${{ steps.config.outputs.SUBSCRIPTION_ID }}  
+      # Azure resources
+      acr_registry: ${{ steps.config.outputs.acr_registry }}
+      app_name: ${{ steps.config.outputs.app_name }}
+      resource_group: ${{ steps.config.outputs.resource_group }}
+      aks_cluster_name: ${{ steps.config.outputs.aks_cluster_name }}
+      
+      # Vite configuration
+      vite_api_base_url: ${{ steps.config.outputs.vite_api_base_url }}
+      vite_api_flow_storage_url: ${{ steps.config.outputs.vite_api_flow_storage_url }}
+      vite_notification_hub_url: ${{ steps.config.outputs.vite_notification_hub_url }}
+      vite_azure_redirect_uri: ${{ steps.config.outputs.vite_azure_redirect_uri }}
+      vite_azure_client_id: ${{ steps.config.outputs.vite_azure_client_id }}
+      vite_azure_tenant_id: ${{ steps.config.outputs.vite_azure_tenant_id }}
+      vite_azure_scope: ${{ steps.config.outputs.vite_azure_scope }}
+      vite_genone_base_url: ${{ steps.config.outputs.vite_genone_base_url }}
+      vite_collab_ws: ${{ steps.config.outputs.vite_collab_ws }}
+      vite_mode: ${{ steps.config.outputs.vite_mode }}
+
+    steps:
+      - name: "Determine Environment Configuration"
+        id: config
+        run: |
+          echo "Determining environment configuration for branch: ${{ github.ref_name }}"
+          
+          case "${{ github.ref_name }}" in
+            prod)
+              echo "environment=production" >> $GITHUB_OUTPUT
+              echo "environment_short=prod" >> $GITHUB_OUTPUT
+              echo "SUBSCRIPTION_ID=0d2eaec7-6585-4ec1-8878-4c55bf9f8b71" >> $GITHUB_OUTPUT
+              echo "acr_registry=genorproduaenorthacr.azurecr.io" >> $GITHUB_OUTPUT
+              echo "app_name=genor-prod-uaenorth-app" >> $GITHUB_OUTPUT
+              echo "resource_group=genor-prod-uaenorth-rg" >> $GITHUB_OUTPUT
+              echo "aks_cluster_name=genor-prod-uaenorth-aks" >> $GITHUB_OUTPUT
+              echo "vite_api_base_url=https://genor-prod-uaenorth-apim.azure-api.net/api" >> $GITHUB_OUTPUT
+              echo "vite_api_flow_storage_url=https://submission-service.jollyglacier-333ae961.uaenorth.azurecontainerapps.io" >> $GITHUB_OUTPUT
+              echo "vite_notification_hub_url=https://genor-prod-uaenorth-apim.azure-api.net/notificationHub" >> $GITHUB_OUTPUT
+              echo "vite_azure_redirect_uri=https://genor-prod-uaenorth-app.azurewebsites.net/auth/callback" >> $GITHUB_OUTPUT
+              echo "vite_azure_client_id=c85b0938-7343-472b-8d48-42c7d8297261" >> $GITHUB_OUTPUT
+              echo "vite_azure_tenant_id=abcca9f5-7acc-43da-9d88-77cd3de47273" >> $GITHUB_OUTPUT
+              echo "vite_azure_scope=openid profile email" >> $GITHUB_OUTPUT
+              echo "vite_genone_base_url=https://genor-prod-uaenorth-apim.azure-api.net/api/genone" >> $GITHUB_OUTPUT
+              echo "vite_collab_ws=wss://genor-prod-uaenorth-apim.azure-api.net/config-socket" >> $GITHUB_OUTPUT
+              echo "vite_mode=prod" >> $GITHUB_OUTPUT
+              ;;
+            uat)
+              echo "environment=uat" >> $GITHUB_OUTPUT
+              echo "environment_short=uat" >> $GITHUB_OUTPUT
+              echo "SUBSCRIPTION_ID=e3e82a1f-c216-4c0a-91fc-5f648859af04" >> $GITHUB_OUTPUT
+              echo "acr_registry=genoruatuaenorthacr.azurecr.io" >> $GITHUB_OUTPUT
+              echo "app_name=genor-uat-uaenorth-app" >> $GITHUB_OUTPUT
+              echo "resource_group=genor-uat-uaenorth-rg" >> $GITHUB_OUTPUT
+              echo "aks_cluster_name=genor-uat-uaenorth-aks" >> $GITHUB_OUTPUT
+              echo "vite_api_base_url=https://genor-uat-uaenorth-apim.azure-api.net/api" >> $GITHUB_OUTPUT
+              echo "vite_api_flow_storage_url=https://submission-service.jollyglacier-333ae961.uaenorth.azurecontainerapps.io" >> $GITHUB_OUTPUT
+              echo "vite_notification_hub_url=https://genor-uat-uaenorth-apim.azure-api.net/notificationHub" >> $GITHUB_OUTPUT
+              echo "vite_azure_redirect_uri=https://genor-uat-uaenorth-app.azurewebsites.net/auth/callback" >> $GITHUB_OUTPUT
+              echo "vite_azure_client_id=df45d7b2-130c-44e8-9bae-3134ff9b647b" >> $GITHUB_OUTPUT
+              echo "vite_azure_tenant_id=abcca9f5-7acc-43da-9d88-77cd3de47273" >> $GITHUB_OUTPUT
+              echo "vite_azure_scope=openid profile email" >> $GITHUB_OUTPUT
+              echo "vite_genone_base_url=https://genor-uat-uaenorth-apim.azure-api.net/api/genone" >> $GITHUB_OUTPUT
+              echo "vite_collab_ws=wss://genor-uat-uaenorth-apim.azure-api.net/config-socket" >> $GITHUB_OUTPUT
+              echo "vite_mode=uat" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "environment=staging" >> $GITHUB_OUTPUT
+              echo "environment_short=test" >> $GITHUB_OUTPUT
+              echo "SUBSCRIPTION_ID=7a6f0e9d-1f97-4e12-a35f-42308ed40ae5" >> $GITHUB_OUTPUT
+              echo "acr_registry=genortestuaenorthacr.azurecr.io" >> $GITHUB_OUTPUT
+              echo "app_name=genor-test-uaenorth-app" >> $GITHUB_OUTPUT
+              echo "resource_group=genor-test-uaenorth-rg" >> $GITHUB_OUTPUT
+              echo "aks_cluster_name=genor-test-uaenorth-aks" >> $GITHUB_OUTPUT
+              echo "vite_api_base_url=https://genor-test-uaenorth-apim.azure-api.net/api" >> $GITHUB_OUTPUT
+              echo "vite_api_flow_storage_url=https://submission-service.jollyglacier-333ae961.uaenorth.azurecontainerapps.io" >> $GITHUB_OUTPUT
+              echo "vite_notification_hub_url=https://genor-test-uaenorth-apim.azure-api.net/notificationHub" >> $GITHUB_OUTPUT
+              echo "vite_azure_redirect_uri=https://genor-test-uaenorth-app.azurewebsites.net/auth/callback" >> $GITHUB_OUTPUT
+              echo "vite_azure_client_id=b1a28a4f-7abe-4388-967b-fbfbe1b91cda" >> $GITHUB_OUTPUT
+              echo "vite_azure_tenant_id=abcca9f5-7acc-43da-9d88-77cd3de47273" >> $GITHUB_OUTPUT
+              echo "vite_azure_scope=openid profile email" >> $GITHUB_OUTPUT
+              echo "vite_genone_base_url=https://genor-test-uaenorth-apim.azure-api.net/api/genone" >> $GITHUB_OUTPUT
+              echo "vite_collab_ws=wss://genor-test-uaenorth-apim.azure-api.net/config-socket" >> $GITHUB_OUTPUT
+              echo "vite_mode=staging" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "environment=development" >> $GITHUB_OUTPUT
+              echo "environment_short=dev" >> $GITHUB_OUTPUT
+              echo "SUBSCRIPTION_ID=e3e82a1f-c216-4c0a-91fc-5f648859af04" >> $GITHUB_OUTPUT
+              echo "acr_registry=genordevuaenorthacr.azurecr.io" >> $GITHUB_OUTPUT
+              echo "app_name=genor-dev-uaenorth-app" >> $GITHUB_OUTPUT
+              echo "resource_group=genor-dev-uaenorth-rg" >> $GITHUB_OUTPUT
+              echo "aks_cluster_name=genor-dev-uaenorth-aks" >> $GITHUB_OUTPUT
+              echo "vite_api_base_url=https://genor-dev-uaenorth-apim.azure-api.net/api" >> $GITHUB_OUTPUT
+              echo "vite_api_flow_storage_url=https://submission-service.jollyglacier-333ae961.uaenorth.azurecontainerapps.io" >> $GITHUB_OUTPUT
+              echo "vite_notification_hub_url=https://genor-dev-uaenorth-apim.azure-api.net/notificationHub" >> $GITHUB_OUTPUT
+              echo "vite_azure_redirect_uri=https://genor-dev-uaenorth-app.azurewebsites.net/auth/callback" >> $GITHUB_OUTPUT
+              echo "vite_azure_client_id=a2009acb-3608-4fb1-b235-511ffc36516d" >> $GITHUB_OUTPUT
+              echo "vite_azure_tenant_id=abcca9f5-7acc-43da-9d88-77cd3de47273" >> $GITHUB_OUTPUT
+              echo "vite_azure_scope=openid profile email" >> $GITHUB_OUTPUT
+              echo "vite_genone_base_url=https://genor-dev-uaenorth-apim.azure-api.net/api/genone" >> $GITHUB_OUTPUT
+              echo "vite_collab_ws=wss://genor-dev-uaenorth-apim.azure-api.net/config-socket" >> $GITHUB_OUTPUT
+              echo "vite_mode=dev" >> $GITHUB_OUTPUT
+              ;;
+          esac
+        shell: bash
+
+      - name: "Display Configuration Summary"
+        run: |
+          echo "## Environment Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ steps.config.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Subscription | ${{ steps.config.outputs.SUBSCRIPTION_ID }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ACR Registry | ${{ steps.config.outputs.acr_registry }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| App Service | ${{ steps.config.outputs.app_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Resource Group | ${{ steps.config.outputs.resource_group }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| AKS Cluster | ${{ steps.config.outputs.aks_cluster_name }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # JOB 3: BUILD & PUSH DOCKER IMAGE
+  # ===========================================================================
+  build_and_push:
+    name: "Build & Push Docker Image"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: setup  # Runs in parallel with code_quality_analysis
+
+    permissions:
+      contents: read
+      security-events: write
+
+    outputs:
+      image_tag: ${{ steps.generate-tags.outputs.image_tag }}
+      latest_tag: ${{ steps.generate-tags.outputs.latest_tag }}
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Azure Login"
+        uses: azure/login@v2
+        with:
+          creds: ${{ github.ref_name == 'prod' && secrets.AZURE_CREDENTIALS_PROD || github.ref_name == 'uat' && secrets.AZURE_CREDENTIALS_UAT || github.ref_name == 'staging' && secrets.AZURE_CREDENTIALS_STAGING || secrets.AZURE_CREDENTIALS_DEV }}
+
+      - name: "Azure Container Registry Login"
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ needs.setup.outputs.acr_registry }}
+          username: ${{ github.ref_name == 'prod' && secrets.ACR_USERNAME_PROD || github.ref_name == 'uat' && secrets.ACR_USERNAME_UAT || github.ref_name == 'staging' && secrets.ACR_USERNAME_STAGING || secrets.ACR_USERNAME_DEV }}
+          password: ${{ github.ref_name == 'prod' && secrets.ACR_PASSWORD_PROD || github.ref_name == 'uat' && secrets.ACR_PASSWORD_UAT || github.ref_name == 'staging' && secrets.ACR_PASSWORD_STAGING || secrets.ACR_PASSWORD_DEV }}
+
+      - name: "Setup Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+
+      - name: "Generate Image Tags"
+        id: generate-tags
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          
+          IMAGE_TAG="${{ needs.setup.outputs.acr_registry }}/${{ needs.setup.outputs.app_name }}:${{ needs.setup.outputs.environment }}-${SHORT_SHA}"
+          LATEST_TAG="${{ needs.setup.outputs.acr_registry }}/${{ needs.setup.outputs.app_name }}:${{ needs.setup.outputs.environment }}-latest"
+          
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          
+          echo "Generated tags:"
+          echo "  - ${IMAGE_TAG}"
+          echo "  - ${LATEST_TAG}"
+
+      - name: "Build and Push Docker Image"
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.generate-tags.outputs.image_tag }}
+            ${{ steps.generate-tags.outputs.latest_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            ENVIRONMENT=${{ needs.setup.outputs.environment }}
+            VITE_API_BASE_URL=${{ needs.setup.outputs.vite_api_base_url }}
+            VITE_API_FLOW_STORAGE_URL=${{ needs.setup.outputs.vite_api_flow_storage_url }}
+            VITE_NOTIFICATION_HUB_URL=${{ needs.setup.outputs.vite_notification_hub_url }}
+            VITE_AZURE_REDIRECT_URI=${{ needs.setup.outputs.vite_azure_redirect_uri }}
+            VITE_AZURE_CLIENT_ID=${{ needs.setup.outputs.vite_azure_client_id }}
+            VITE_AZURE_TENANT_ID=${{ needs.setup.outputs.vite_azure_tenant_id }}
+            VITE_AZURE_SCOPE=${{ needs.setup.outputs.vite_azure_scope }}
+            VITE_GENONE_BASE_URL=${{ needs.setup.outputs.vite_genone_base_url }}
+            VITE_COLLAB_WS=${{ needs.setup.outputs.vite_collab_ws }}
+            VITE_MODE=${{ needs.setup.outputs.vite_mode }}
+
+  # ===========================================================================
+  # JOB 5: DEPLOY TO AZURE APP SERVICE
+  # ===========================================================================
+  deploy:
+    name: "Deploy to Azure App Service"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [setup, build_and_push]
+    environment: ${{ needs.setup.outputs.environment }}
+
+    steps:
+      - name: "Azure Login"
+        uses: azure/login@v2
+        with:
+          creds: ${{ github.ref_name == 'prod' && secrets.AZURE_CREDENTIALS_PROD || github.ref_name == 'uat' && secrets.AZURE_CREDENTIALS_UAT || github.ref_name == 'staging' && secrets.AZURE_CREDENTIALS_STAGING || secrets.AZURE_CREDENTIALS_DEV }}
+
+      - name: "Deploy to Azure App Service"
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ needs.setup.outputs.app_name }}
+          images: ${{ needs.build_and_push.outputs.image_tag }}
+
+      - name: "Deployment Summary"
+        run: |
+          echo "## Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | ${{ needs.setup.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **App Service** | ${{ needs.setup.outputs.app_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Image** | \`${{ needs.build_and_push.outputs.image_tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed By** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # JOB 6: SEND NOTIFICATIONS
+  # ===========================================================================
+  notify:
+    name: "Send Notifications"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [setup, build_and_push, deploy]
+    if: always()
+
+    steps:
+      - name: "Determine Pipeline Status"
+        id: pipeline-status
+        run: |
+          CODE_QUALITY_STATUS="${{ needs.code_quality_analysis.result }}"
+          BUILD_STATUS="${{ needs.build_and_push.result }}"
+          SECURITY_STATUS="${{ needs.security_scan.result }}"
+          DEPLOY_STATUS="${{ needs.deploy.result }}"
+          
+          echo "Job Results:"
+          echo "  - Code Quality: $CODE_QUALITY_STATUS"
+          echo "  - Build: $BUILD_STATUS"
+          echo "  - Security: $SECURITY_STATUS"
+          echo "  - Deploy: $DEPLOY_STATUS"
+          
+          # Determine overall status (ignoring skipped jobs)
+          if [[ "$BUILD_STATUS" == "success" && "$DEPLOY_STATUS" == "success" ]]; then
+            FINAL_STATUS="success"
+          elif [[ "$BUILD_STATUS" == "failure" || "$DEPLOY_STATUS" == "failure" ]]; then
+            FINAL_STATUS="failure"
+          else
+            FINAL_STATUS="warning"
+          fi
+          
+          echo "FINAL_STATUS=$FINAL_STATUS" >> $GITHUB_OUTPUT
+          echo "CODE_QUALITY_STATUS=$CODE_QUALITY_STATUS" >> $GITHUB_OUTPUT
+          echo "BUILD_STATUS=$BUILD_STATUS" >> $GITHUB_OUTPUT
+          echo "SECURITY_STATUS=$SECURITY_STATUS" >> $GITHUB_OUTPUT
+          echo "DEPLOY_STATUS=$DEPLOY_STATUS" >> $GITHUB_OUTPUT
+
+      - name: "Get Developer Information"
+        id: developer-info
+        run: |
+          DEVELOPER_NAME="${{ github.event.head_commit.author.name }}"
+          if [ -z "$DEVELOPER_NAME" ]; then
+            DEVELOPER_NAME="${{ github.actor }}"
+          fi
+          
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          if [ -z "$COMMIT_MESSAGE" ]; then
+            COMMIT_MESSAGE="Manual trigger or no commit message"
+          fi
+          
+          # Sanitize commit message
+          COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | tr '\n' ' ' | tr '\r' ' ' | sed 's/"/\\"/g' | head -c 200)
+          
+          echo "DEVELOPER_NAME<<EOF" >> $GITHUB_OUTPUT
+          echo "$DEVELOPER_NAME" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "COMMIT_MESSAGE<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: "Send Microsoft Teams Notification"
+        run: |
+          # Determine status styling
+          if [[ "${{ steps.pipeline-status.outputs.FINAL_STATUS }}" == "success" ]]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="SUCCEEDED"
+            STATUS_COLOR="Good"
+          elif [[ "${{ steps.pipeline-status.outputs.FINAL_STATUS }}" == "failure" ]]; then
+            STATUS_ICON="❌"
+            STATUS_TEXT="FAILED"
+            STATUS_COLOR="Attention"
+          else
+            STATUS_ICON="⚠️"
+            STATUS_TEXT="COMPLETED WITH WARNINGS"
+            STATUS_COLOR="Warning"
+          fi
+          
+          # Helper function to get status indicator
+          get_status_indicator() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              skipped) echo "⏭️" ;;
+              cancelled) echo "🚫" ;;
+              *) echo "⚠️" ;;
+            esac
+          }
+          
+          CODE_QUALITY_EMOJI=$(get_status_emoji "${{ steps.pipeline-status.outputs.CODE_QUALITY_STATUS }}")
+          BUILD_EMOJI=$(get_status_emoji "${{ steps.pipeline-status.outputs.BUILD_STATUS }}")
+          SECURITY_EMOJI=$(get_status_emoji "${{ steps.pipeline-status.outputs.SECURITY_STATUS }}")
+          DEPLOY_EMOJI=$(get_status_emoji "${{ steps.pipeline-status.outputs.DEPLOY_STATUS }}")
+          
+          # Determine environment emoji
+          case "${{ github.ref_name }}" in
+            prod) ENV_DISPLAY="🔴 Production" ;;
+            uat) ENV_DISPLAY="🟠 UAT" ;;
+            staging) ENV_DISPLAY="🟡 Staging" ;;
+            *) ENV_DISPLAY="🟢 Development" ;;
+          esac
+          
+          # Create adaptive card payload
+          cat > teams_payload.json << EOF
+          {
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.5",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "size": "Large",
+                      "weight": "Bolder",
+                      "text": "${STATUS_ICON} Platform Portal - ${STATUS_TEXT}",
+                      "color": "${STATUS_COLOR}"
+                    },
+                    {
+                      "type": "FactSet",
+                      "facts": [
+                        { "title": "Repository", "value": "${{ github.repository }}" },
+                        { "title": "Branch", "value": "${{ github.ref_name }}" },
+                        { "title": "Environment", "value": "$ENV_DISPLAY" },
+                        { "title": "Developer", "value": "${{ steps.developer-info.outputs.DEVELOPER_NAME }}" },
+                        { "title": "Commit", "value": "${{ github.sha }}" }
+                      ]
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "**Commit:** ${{ steps.developer-info.outputs.COMMIT_MESSAGE }}",
+                      "wrap": true,
+                      "spacing": "Medium"
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "**Pipeline Results**",
+                      "weight": "Bolder",
+                      "spacing": "Large"
+                    },
+                    {
+                      "type": "FactSet",
+                      "facts": [
+                        { "title": "Code Quality", "value": "${CODE_QUALITY_EMOJI} ${{ steps.pipeline-status.outputs.CODE_QUALITY_STATUS }}" },
+                        { "title": "Build & Push", "value": "${BUILD_EMOJI} ${{ steps.pipeline-status.outputs.BUILD_STATUS }}" },
+                        { "title": "Security Scan", "value": "${SECURITY_EMOJI} ${{ steps.pipeline-status.outputs.SECURITY_STATUS }}" },
+                        { "title": "Deployment", "value": "${DEPLOY_EMOJI} ${{ steps.pipeline-status.outputs.DEPLOY_STATUS }}" }
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": "Action.OpenUrl",
+                      "title": "View Workflow",
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    },
+                    {
+                      "type": "Action.OpenUrl",
+                      "title": "Security Tab",
+                      "url": "${{ github.server_url }}/${{ github.repository }}/security/code-scanning"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+          EOF
+          
+          echo "Sending Teams notification..."
+          
+          HTTP_STATUS=$(curl -s -o teams_response.txt -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d @teams_payload.json \
+            "${{ secrets.TEAMS_WEBHOOK_URL }}")
+          
+          if [[ $HTTP_STATUS == 2* ]]; then
+            echo "✅ Teams notification sent successfully!"
+          else
+            echo "❌ Teams notification failed with status: ${HTTP_STATUS}"
+            cat teams_response.txt
+          fi
+        continue-on-error: true

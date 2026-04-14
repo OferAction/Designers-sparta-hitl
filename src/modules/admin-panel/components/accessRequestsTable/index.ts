@@ -1,0 +1,1 @@
+export { AccessRequestsTable } from "./AccessRequestsTable";

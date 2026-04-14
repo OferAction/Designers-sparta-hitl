@@ -1,0 +1,1095 @@
+{
+  "start": {
+    "nodeType": "start",
+    "data": {
+      "canvasType": "start",
+      "label": "start_node",
+      "nodeTitle": "Start",
+      "icon": "start",
+      "nodeSubtitle": "Start node",
+      "nodeTitleDescription": "Start of the orchestration",
+      "inputs": [],
+      "outputs": []
+    },
+    "draggable": true,
+    "selectable": false,
+    "selected": false
+  },
+  "end": {
+    "nodeType": "end",
+    "data": {
+      "canvasType": "end",
+      "label": "end_node",
+      "nodeTitle": "End",
+      "icon": "end",
+      "nodeSubtitle": "End node",
+      "nodeTitleDescription": "End of the orchestration",
+      "inputs": [
+        {
+          "id": 0,
+          "label": "Final output",
+          "render_type": "dropdown",
+          "type": {
+            "value": "any",
+            "label": "Any"
+          },
+          "value": null
+        }
+      ],
+      "outputs": []
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "userInput": {
+    "nodeType": "userInput",
+    "data": {
+      "icon": "userInput",
+      "canvasType": "userInput",
+      "label": "userInput node",
+      "nodeTitle": "User input",
+      "nodeSubtitle": "User input operator",
+      "nodeTitleDescription": "Define the inputs required for the orchestration",
+      "local_parameters": [],
+      "inputs": [],
+      "outputs": [],
+      "externalDataPoints": []
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "regexBinaryClassifier": {
+    "nodeType": "regexBinaryClassifier",
+    "data": {
+      "icon": "regexBinaryClassifier",
+      "canvasType": "agent",
+      "label": "regex_binary_classifier_node",
+      "nodeTitle": "Regex Binary Classifier",
+      "nodeSubtitle": "Regex Binary Classifier",
+      "nodeTitleDescription": "Classifies if the input text some regex patterns",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "text to classify",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        },
+        {
+          "id": 1,
+          "label": "regex patterns",
+          "render_type": "regex",
+          "type": {
+            "value": "list",
+            "label": "List"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 2,
+          "label": "unwanted regex patterns",
+          "render_type": "regex",
+          "type": {
+            "value": "list",
+            "label": "List"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 3,
+          "label": "relevant match",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": {
+            "label": "Any",
+            "value": "any"
+          },
+          "configType": "init_kwargs",
+          "options": [
+            {
+              "label": "Any",
+              "value": "any"
+            },
+            {
+              "label": "First",
+              "value": "first"
+            },
+            {
+              "label": "Last",
+              "value": "last"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "label": "context range",
+          "render_type": "number",
+          "type": {
+            "value": "int",
+            "label": "Integer"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "classification",
+          "type": {
+            "value": "bool",
+            "label": "Boolean"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "regexMultiLabelClassifier": {
+    "nodeType": "regexMultiLabelClassifier",
+    "data": {
+      "icon": "regexMultiLabelClassifier",
+      "canvasType": "agent",
+      "label": "regex_multi_label_classifier_node",
+      "nodeTitle": "Regex Mutli Label Classifier",
+      "nodeSubtitle": "Regex Mutli Label Classifier",
+      "nodeTitleDescription": "Multi-label classification using regular expressions. It classifies input data into multiple labels based on specified regex patterns",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "text to classify",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        },
+        {
+          "id": 1,
+          "label": "Regex labels mapping",
+          "render_type": "dict",
+          "type": {
+            "value": "dict-str_dict",
+            "label": "Dict[str, dict]"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "labels",
+          "type": {
+            "value": "list",
+            "label": "List"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "regexMultiClassClassifier": {
+    "nodeType": "regexMultiClassClassifier",
+    "data": {
+      "icon": "regexMultiClassClassifier",
+      "canvasType": "agent",
+      "label": "regex_multi_class_classifier_node",
+      "nodeTitle": "Regex Mutli Class Classifier",
+      "nodeSubtitle": "Regex Mutli Class Classifier",
+      "nodeTitleDescription": "Performs multi-class classification using regular expressions. It classifies input data into a single class based on specified regex patterns and class priorities",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "text to classify",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        },
+        {
+          "id": 1,
+          "label": "Regex labels mapping",
+          "render_type": "dict",
+          "type": {
+            "value": "dict-str_dict",
+            "label": "Dict[str, dict]"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 2,
+          "label": "Classes priorities",
+          "render_type": "dict",
+          "type": {
+            "value": "list-str",
+            "label": "List[str]"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "classification",
+          "type": {
+            "value": "str",
+            "label": "String"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "ocrAgent": {
+    "nodeType": "ocrAgent",
+    "data": {
+      "icon": "ocrAgent",
+      "canvasType": "agent",
+      "label": "ocr_agent",
+      "nodeTitle": "OCR Agent",
+      "nodeSubtitle": "OCR Agent",
+      "nodeTitleDescription": "Extracts text from PDF files using OCR",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "Pdf",
+          "render_type": "dropdown",
+          "type": {
+            "value": "bytes",
+            "label": "Bytes"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "metadata",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          }
+        },
+        {
+          "label": "raw_ocr_result",
+          "type": {
+            "value": "bytes",
+            "label": "Bytes"
+          }
+        },
+        {
+          "label": "content",
+          "type": {
+            "value": "str",
+            "label": "String"
+          }
+        },
+        {
+          "label": "pages_content",
+          "type": {
+            "value": "list",
+            "label": "List"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "formattingAgent": {
+    "nodeType": "formattingAgent",
+    "data": {
+      "icon": "formattingAgent",
+      "canvasType": "agent",
+      "label": "formatting_agent",
+      "nodeTitle": "Formatting Agent",
+      "nodeSubtitle": "Formatting Agent",
+      "nodeTitleDescription": "Formats the input data into the specified data scheme",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "Data scheme",
+          "render_type": "dropdown",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 0,
+          "label": "Data",
+          "render_type": "dropdown",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        }
+      ],
+      "outputs": []
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "mappingAgent": {
+    "nodeType": "mappingAgent",
+    "data": {
+      "icon": "mappingAgent",
+      "canvasType": "agent",
+      "label": "mapping_agent",
+      "nodeTitle": "Mapping Agent",
+      "nodeSubtitle": "Mapping Agent",
+      "nodeTitleDescription": "Gets the corresponding value from the mapping based on the key",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "Mapping",
+          "render_type": "dropdown",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 0,
+          "label": "Key",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "value",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "llmAgent": {
+    "nodeType": "llmAgent",
+    "data": {
+      "icon": "llmAgent",
+      "canvasType": "agent",
+      "label": "llm_agent",
+      "nodeTitle": "LLM Agent",
+      "nodeSubtitle": "LLM Agent",
+      "nodeTitleDescription": "Responsible for interacting with large language models using specified model providers",
+      "local_parameters": [
+        {
+          "id": 0,
+          "label": "Hyperparameters",
+          "render_type": "code",
+          "type": {
+            "value": "dict-str_any",
+            "label": "Dict[str, any]"
+          },
+          "language": {
+            "label": "YAML",
+            "value": "yaml"
+          },
+          "value": ""
+        }
+      ],
+      "inputs": [
+        {
+          "id": 2,
+          "label": "Hyperparameters",
+          "render_type": "hidden",
+          "type": {
+            "value": "dict-str_any",
+            "label": "Dict[str, any]"
+          },
+          "value": {
+            "label": "hyperparameters",
+            "value": 0,
+            "reference": "local_param"
+          },
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 0,
+          "label": "Model provider",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "options": [
+            {
+              "value": "azureopenai",
+              "label": "Azure OpenAI"
+            }
+          ],
+          "value": {
+            "value": "azureopenai",
+            "label": "Azure OpenAI"
+          },
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 1,
+          "label": "Model",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "options": [
+            {
+              "value": "gpt-4o",
+              "label": "GPT-4o"
+            }
+          ],
+          "value": {
+            "value": "gpt-4o",
+            "label": "GPT-4o"
+          },
+          "configType": "hyperparameter"
+        },
+        {
+          "id": 5,
+          "label": "Response format",
+          "render_type": "dropdown",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          },
+          "value": {},
+          "configType": "pydantic"
+        },
+        {
+          "id": 3,
+          "label": "System prompt",
+          "render_type": "str",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": "",
+          "objectRepresentation": [],
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 4,
+          "label": "Messages",
+          "render_type": "multi_str",
+          "type": {
+            "value": "list",
+            "label": "List"
+          },
+          "value": [
+            {
+              "id": "543332e9-1a43-420a-9c65-ea114e9236c0",
+              "value": "",
+              "type": {
+                "value": "str",
+                "label": "String"
+              }
+            }
+          ],
+          "configType": "call_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "response",
+          "type": {
+            "value": "str",
+            "label": "String"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "conditionalOperator": {
+    "nodeType": "conditionalOperator",
+    "data": {
+      "icon": "conditionalOperator",
+      "canvasType": "conditionalOperator",
+      "label": "if_else",
+      "nodeTitle": "If else",
+      "nodeSubtitle": "Conditional logic Operator",
+      "nodeTitleDescription": "Evaluate a condition and determine the next course of action based on whether it is met or not.",
+      "local_parameters": [],
+      "conditions": [
+        {
+          "type": "IF",
+          "values": [
+            {
+              "field": null,
+              "operator": null,
+              "value": "",
+              "logicalOperator": null
+            }
+          ]
+        },
+        {
+          "type": "ELSE",
+          "values": []
+        }
+      ],
+      "inputs": [],
+      "outputs": []
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "customCodeAgent": {
+    "nodeType": "customCodeAgent",
+    "data": {
+      "icon": "customCodeAgent",
+      "canvasType": "agent",
+      "code": {
+        "id": 1,
+        "label": "Code",
+        "render_type": "customCode",
+        "configType": "init_kwargs",
+        "type": {
+          "label": "Code",
+          "value": "code"
+        },
+        "language": {
+          "label": "PYTHON",
+          "value": "python"
+        },
+        "value": ""
+      },
+      "label": "code_genius",
+      "nodeTitle": "code genius",
+      "nodeSubtitle": "Custom code agent",
+      "nodeTitleDescription": "Custom code agent",
+      "local_parameters": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "id": 1,
+          "label": "result",
+          "type": {
+            "label": "String",
+            "value": "str"
+          },
+          "value": ""
+        }
+      ],
+      "datasets": []
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "iteration": {
+    "type": "group",
+    "nodeType": "iteration",
+    "data": {
+      "icon": "iteration",
+      "canvasType": "iteration",
+      "iterationType": "iterator",
+      "label": "iteration",
+      "nodeTitle": "Iteration",
+      "nodeSubtitle": "Iteration Operator",
+      "nodeTitleDescription": "Iterate over the dataset",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "iterable",
+          "render_type": "dropdown",
+          "type": {
+            "value": "list-dict",
+            "label": "List | Dict"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        }
+      ],
+      "outputs": []
+    },
+    "selectable": true,
+    "width": 354,
+    "height": 145,
+    "measured": {
+      "width": 1000,
+      "height": 200
+    },
+    "selected": false
+  },
+  "aggregator": {
+    "nodeType": "aggregator",
+    "data": {
+      "icon": "aggregator",
+      "canvasType": "aggregator",
+      "label": "aggregator",
+      "nodeTitle": "Aggregator",
+      "nodeSubtitle": "Operator",
+      "nodeTitleDescription": "",
+      "inputs": [
+        {
+          "id": 0,
+          "label": "Group",
+          "render_type": "group",
+          "type": {},
+          "value": []
+        }
+      ],
+      "outputs": [
+        {
+          "label": "Group",
+          "render_type": "group",
+          "value": [
+            {
+              "label": "New Value",
+              "render_type": "dropdown",
+              "id": 0.3450458270401253
+            }
+          ],
+          "id": "366a54e2-c027-471d-a88c-5216944f9dd6"
+        }
+      ]
+    },
+    "selectable": true,
+    "selected": false
+  },
+  "APIAgent": {
+    "nodeType": "APIAgent",
+    "data": {
+      "icon": "APIAgent",
+      "canvasType": "agent",
+      "label": "API_agent",
+      "nodeTitle": "API Agent",
+      "nodeSubtitle": "API Agent",
+      "nodeTitleDescription": "Fetches data from the specified API endpoint",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "API URL",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 1,
+          "label": "API Host",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 2,
+          "label": "API Key",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 3,
+          "label": "API parameters",
+          "render_type": "dropdown",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "response",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "TrOCRAgent": {
+    "nodeType": "TrOCRAgent",
+    "data": {
+      "icon": "TrOCRAgent",
+      "canvasType": "agent",
+      "label": "TrOCR_Agent",
+      "nodeTitle": "TrOCR Agent",
+      "nodeSubtitle": "TrOCR Agent",
+      "nodeTitleDescription": "A TrOCR agent for loading vision encoder-decoder models from Hugging Face or local files, with support for fine-tuning on number/code recognition and running inference.",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 5,
+          "label": "Image",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "Numpy Array"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        },
+        {
+          "id": 0,
+          "label": "Model path",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 1,
+          "label": "Processor path",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 2,
+          "label": "Hosting mode",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": {
+            "label": "BentoML",
+            "value": "bentoml"
+          },
+          "options": [
+            {
+              "label": "BentoML",
+              "value": "bentoml"
+            }
+          ],
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 3,
+          "label": "BentoML endpoint",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 4,
+          "label": "Confidence threshold",
+          "render_type": "str",
+          "type": {
+            "value": "float",
+            "label": "Float"
+          },
+          "configType": "init_kwargs",
+          "value": "0.5",
+          "objectRepresentation": [
+            {
+              "type": "text",
+              "value": "0.5"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "label": "text",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "VITClassifier": {
+    "nodeType": "VITClassifier",
+    "data": {
+      "icon": "VITClassifier",
+      "canvasType": "agent",
+      "label": "VIT_Classifier",
+      "nodeTitle": "VIT Classifier",
+      "nodeSubtitle": "VITClassifier",
+      "nodeTitleDescription": "A transformer-based image classification agent for loading models from Hugging Face or local files, with optional fine-tuning.",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 4,
+          "label": "Images",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "Numpy Array"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        },
+        {
+          "id": 0,
+          "label": "Model path",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 1,
+          "label": "Processor path",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 2,
+          "label": "Hosting mode",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": {
+            "label": "BentoML",
+            "value": "bentoml"
+          },
+          "options": [
+            {
+              "label": "BentoML",
+              "value": "bentoml"
+            }
+          ],
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 3,
+          "label": "BentoML endpoint",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "vit_result",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "YOLOAgent": {
+    "nodeType": "YOLOAgent",
+    "data": {
+      "icon": "YOLOAgent",
+      "canvasType": "agent",
+      "label": "YOLO_agent",
+      "nodeTitle": "YOLO Agent",
+      "nodeSubtitle": "YOLO Agent",
+      "nodeTitleDescription": "Enables object detection and classification using Ultralytics YOLO and optionally allows fine-tuning.",
+      "local_parameters": [],
+      "inputs": [
+        {
+          "id": 0,
+          "label": "Model path",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 2,
+          "label": "Hosting mode",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": {
+            "label": "BentoML",
+            "value": "bentoml"
+          },
+          "options": [
+            {
+              "label": "BentoML",
+              "value": "bentoml"
+            },
+            {
+              "label": "Local",
+              "value": "localhost:8000/"
+            }
+          ],
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 3,
+          "label": "BentoML endpoint",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "value": null,
+          "configType": "init_kwargs"
+        },
+        {
+          "id": 5,
+          "label": "Task",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "String"
+          },
+          "configType": "init_kwargs",
+          "value": {
+            "label": "Detection",
+            "value": "detection"
+          },
+          "options": [
+            {
+              "label": "Detection",
+              "value": "detection"
+            },
+            {
+              "label": "Classification",
+              "value": "classification"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "label": "Data",
+          "render_type": "dropdown",
+          "type": {
+            "value": "str",
+            "label": "Numpy Array"
+          },
+          "value": null,
+          "configType": "call_kwargs"
+        },
+        {
+          "id": 4,
+          "label": "Minimum confidence",
+          "render_type": "str",
+          "type": {
+            "value": "float",
+            "label": "Float"
+          },
+          "configType": "init_kwargs",
+          "value": "0.6",
+          "objectRepresentation": [
+            {
+              "type": "text",
+              "value": "0.6"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "label": "output",
+          "type": {
+            "value": "dict",
+            "label": "Dictionary"
+          }
+        }
+      ]
+    },
+    "draggable": true,
+    "selectable": true,
+    "selected": false
+  },
+  "dataLoader": null,
+  "metadataProcessor": null
+}

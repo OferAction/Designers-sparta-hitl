@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 66">
+  <defs>
+    <linearGradient id="sapBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#42B3E5"/>
+      <stop offset="55%" stop-color="#007CC1"/>
+      <stop offset="100%" stop-color="#004F8B"/>
+    </linearGradient>
+    <clipPath id="sapClip">
+      <rect width="132" height="66" rx="5"/>
+    </clipPath>
+  </defs>
+  <rect width="132" height="66" rx="5" fill="url(#sapBg)"/>
+  <g clip-path="url(#sapClip)">
+    <polygon points="0,0 58,0 0,66" fill="white" opacity="0.18"/>
+    <polygon points="0,0 28,0 0,32" fill="white" opacity="0.12"/>
+  </g>
+  <text x="66" y="44" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="30" font-weight="900" fill="white" text-anchor="middle" letter-spacing="1">SAP</text>
+</svg>

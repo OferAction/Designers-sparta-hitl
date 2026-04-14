@@ -1,0 +1,17 @@
+{
+  "routes": [
+    {
+      "route": "/*",
+      "headers": {
+        "Cache-Control": "no-cache"
+      }
+    }
+  ],
+  "mimeTypes": {
+    ".js": "application/javascript",
+    ".ts": "application/javascript",
+    ".tsx": "application/javascript",
+    ".css": "text/css",
+    ".html": "text/html"
+  }
+}

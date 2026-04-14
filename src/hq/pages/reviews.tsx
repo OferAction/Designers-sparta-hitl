@@ -502,7 +502,7 @@ export default function HQReviewsPage() {
       </div>
 
       <div className="flex items-center flex-shrink-0 mt-2 mb-2" style={{ gap: '24px' }}>
-        <h2 className="text-lg leading-7 font-medium text-foreground">Approval Requests</h2>
+        <h2 className="text-lg leading-7 font-medium text-foreground">Requests for Review</h2>
         {!isMobile && (
           <>
             <div className="w-px h-5 bg-border" />

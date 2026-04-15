@@ -124,44 +124,70 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
       {/* Budget Impact */}
       <div>
         <SectionLabel>Budget Impact</SectionLabel>
-        <div className="grid grid-cols-2 gap-3">
-          {[d.budgetImpact.event, d.budgetImpact.annual].map((b, i) => {
-            const spent = b.current;
+        <div
+          className="rounded-xl overflow-hidden space-y-5 p-3.5"
+          style={{ border: '1px solid var(--border-subtle)', background: 'hsl(var(--muted))' }}
+        >
+          {/* Event · Department · GL Code */}
+          <div className="grid grid-cols-3 gap-x-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Event</p>
+              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{d.budgetImpact.event.name}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{d.event.customerId}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department</p>
+              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{d.apCoding.department}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>GL Code</p>
+              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{d.apCoding.glAccount}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{d.apCoding.subsidiary}</p>
+            </div>
+          </div>
+
+          {/* Department Budget bar */}
+          {(() => {
+            const b = d.budgetImpact.event;
             const total = b.total;
+            const spent = b.current;
             const remaining = total - spent;
             const pct = b.pct;
             return (
-              <div
-                key={i}
-                className="rounded-xl p-3.5"
-                style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)' }}
-              >
-                <p className="text-[11px] font-medium mb-2" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
-                  {i === 0 ? 'Event' : 'Annual'} — {b.name}
-                </p>
-                {/* Unified budget bar */}
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Budget</span>
-                  <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>${total.toLocaleString('en-US')}</span>
+              <div>
+                <div className="flex items-end justify-between mb-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department Budget</p>
+                  <p className="text-xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
                 </div>
-                <div className="w-full h-5 rounded-md overflow-hidden relative" style={{ background: 'hsl(var(--background))' }}>
+                {/* Bar with floating badge */}
+                <div className="relative mt-1 mb-3">
                   <div
-                    className={`h-full rounded-md ${pct >= 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                    style={{ width: `${Math.min(pct, 100)}%`, transition: 'width 0.4s ease' }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-between px-2">
-                    <span className="text-[10px] font-bold" style={{ color: 'hsl(var(--foreground))' }}>{pct}%</span>
-                    <span className="text-[10px] font-bold" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
-                      ${remaining.toLocaleString('en-US')} left
-                    </span>
+                    className="absolute -top-6 z-10 px-2 py-0.5 rounded text-[10px] font-bold text-white"
+                    style={{ left: `${Math.min(pct, 100)}%`, transform: 'translateX(-50%)', background: 'hsl(var(--foreground) / 0.85)' }}
+                  >
+                    {pct}% used
+                  </div>
+                  <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'hsl(var(--foreground) / 0.1)' }}>
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${Math.min(pct, 100)}%`, background: 'linear-gradient(90deg, #14b8a6, #3b82f6)', transition: 'width 0.4s ease' }}
+                    />
                   </div>
                 </div>
-                <p className="text-[11px] mt-2" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>
-                  After approval: ${b.afterApproval.toLocaleString('en-US')} ({b.afterApprovalPct}%)
-                </p>
+                {/* Used / Remaining */}
+                <div className="flex items-center justify-between">
+                  <p>
+                    <span className="text-base font-bold" style={{ color: '#14b8a6' }}>${spent.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-xs ml-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>used</span>
+                  </p>
+                  <p>
+                    <span className="text-xs mr-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>remaining</span>
+                    <span className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>${remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  </p>
+                </div>
               </div>
             );
-          })}
+          })()}
         </div>
       </div>
 
@@ -308,46 +334,67 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
       <div>
         <SectionLabel>Budget Impact</SectionLabel>
         <div
-          className="rounded-xl overflow-hidden"
+          className="rounded-xl overflow-hidden space-y-5 p-3.5"
           style={{ border: '1px solid var(--border-subtle)', background: 'hsl(var(--muted))' }}
         >
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3 px-3.5 py-3">
+          {/* Event · Department · GL Code */}
+          <div className="grid grid-cols-3 gap-x-4">
             <div>
-              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Event</p>
-              <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{ba.eventName ?? '—'} ({ba.eventCode ?? ''})</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Event</p>
+              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{ba.eventName ?? '—'}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{ba.eventCode ?? ''}</p>
             </div>
             <div>
-              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Department</p>
-              <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{ba.deptName ?? '—'}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department</p>
+              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{ba.deptName ?? '—'}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>GL Code</p>
+              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{ba.glCode ?? '—'}</p>
             </div>
           </div>
-          {/* Unified budget bar */}
-          <div className="px-3.5 pb-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[12px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Dept. Budget</p>
-              <p className="text-[12px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>${fmt(ba.deptBudget)}</p>
-            </div>
-            <div className="w-full h-6 rounded-lg overflow-hidden relative" style={{ background: 'hsl(var(--background))' }}>
-              <div
-                className={`h-full rounded-lg ${(ba.utilization ?? 0) >= 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                style={{ width: `${Math.min(ba.utilization ?? 0, 100)}%`, transition: 'width 0.4s ease' }}
-              />
-              <div className="absolute inset-0 flex items-center justify-between px-2.5">
-                <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--foreground))' }}>
-                  {ba.utilization ?? 0}% used
-                </span>
-                <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
-                  ${fmt(ba.remaining)} remaining
-                </span>
+
+          {/* Department Budget bar */}
+          {(() => {
+            const pct = ba.utilization ?? 0;
+            const total = ba.deptBudget ?? 0;
+            const spent = total - (ba.remaining ?? 0);
+            const remaining = ba.remaining ?? 0;
+            return (
+              <div>
+                <div className="flex items-end justify-between mb-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department Budget</p>
+                  <p className="text-xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(total)}</p>
+                </div>
+                {/* Bar with floating badge */}
+                <div className="relative mt-1 mb-3">
+                  <div
+                    className="absolute -top-6 z-10 px-2 py-0.5 rounded text-[10px] font-bold text-white"
+                    style={{ left: `${Math.min(pct, 100)}%`, transform: 'translateX(-50%)', background: 'hsl(var(--foreground) / 0.85)' }}
+                  >
+                    {pct}% used
+                  </div>
+                  <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'hsl(var(--foreground) / 0.1)' }}>
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${Math.min(pct, 100)}%`, background: 'linear-gradient(90deg, #14b8a6, #3b82f6)', transition: 'width 0.4s ease' }}
+                    />
+                  </div>
+                </div>
+                {/* Used / Remaining */}
+                <div className="flex items-center justify-between">
+                  <p>
+                    <span className="text-base font-bold" style={{ color: '#14b8a6' }}>${fmt(spent)}</span>
+                    <span className="text-xs ml-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>used</span>
+                  </p>
+                  <p>
+                    <span className="text-xs mr-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>remaining</span>
+                    <span className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(remaining)}</span>
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 px-3.5 pb-3">
-            <div>
-              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>GL Code</p>
-              <p className="text-sm" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{ba.glCode ?? '—'}</p>
-            </div>
-          </div>
+            );
+          })()}
         </div>
       </div>
       </div>

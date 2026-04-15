@@ -435,17 +435,8 @@ export default function HQReviewsPage() {
   // Role-specific column labels for Sparta Parcel workflows
   const colOverrides = useMemo<ColOverrides | undefined>(() => {
     if (!isSparta) return undefined;
-    if (roleFilter === 'approver') {
-      return { reasonLabel: 'Description', sentLabel: 'Submitted' };
-    }
-    if (roleFilter === 'requester') {
-      /* Approval Status tab shows the budget recommendation column */
-      if (tab === 'approval-status') return { reasonLabel: 'Description', sentLabel: 'Submitted' };
-      return { reasonLabel: null, sentLabel: 'Reason' };
-    }
-    // shipment-manager: hide reason column, rename sent
-    return { reasonLabel: null, sentLabel: 'Submitted' };
-  }, [isSparta, roleFilter, tab]);
+    return { reasonLabel: 'Description', sentLabel: 'Submitted' };
+  }, [isSparta]);
 
   useEffect(() => {
     setSelected(null);

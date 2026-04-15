@@ -289,7 +289,7 @@ export default function HQReviewsPage() {
   const isSparta = workflowFilter === 'sparta-parcel';
 
   const eventIdOptions = useMemo(() => {
-    const ids = new Set(reviews.filter((r) => r.reqId.startsWith('SHP')).map((r) => r.reqId));
+    const ids = new Set(reviews.filter((r) => r.reqId.startsWith('CUS')).map((r) => r.reqId));
     return Array.from(ids).sort();
   }, [reviews]);
 
@@ -329,7 +329,7 @@ export default function HQReviewsPage() {
   const totalPricePerEvent = useMemo(() => {
     const map = new Map<string, number>();
     for (const r of workflowFiltered) {
-      if (!r.reqId.startsWith('SHP')) continue;
+      if (!r.reqId.startsWith('CUS')) continue;
       const price = r.invoice?.price ?? 0;
       map.set(r.reqId, (map.get(r.reqId) ?? 0) + price);
     }

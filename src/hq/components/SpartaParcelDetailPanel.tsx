@@ -131,16 +131,16 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
           {/* Event · Department · GL Code */}
           <div className="grid grid-cols-3 gap-x-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Event</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Event</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{d.budgetImpact.event.name}</p>
               <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{d.event.customerId}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Department</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{d.apCoding.department}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>GL Code</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>GL Code</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{d.apCoding.glAccount}</p>
               <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{d.apCoding.subsidiary}</p>
             </div>
@@ -156,7 +156,7 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
             return (
               <div>
                 <div className="flex items-end justify-between mb-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department Budget</p>
+                  <p className="text-[12px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Department Budget</p>
                   <p className="text-xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
                 </div>
                 {/* Bar with floating badge */}
@@ -340,16 +340,16 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
           {/* Event · Department · GL Code */}
           <div className="grid grid-cols-3 gap-x-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Event</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Event</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{ba.eventName ?? '—'}</p>
               <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>{ba.eventCode ?? ''}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Department</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{ba.deptName ?? '—'}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>GL Code</p>
+              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>GL Code</p>
               <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>{ba.glCode ?? '—'}</p>
             </div>
           </div>
@@ -363,7 +363,7 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
             return (
               <div>
                 <div className="flex items-end justify-between mb-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--foreground) / 0.45)' }}>Department Budget</p>
+                  <p className="text-[12px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Department Budget</p>
                   <p className="text-xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(total)}</p>
                 </div>
                 {/* Bar with floating badge */}

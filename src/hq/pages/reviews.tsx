@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { ArrowsDownUpIcon as ArrowsUpDown, CaretDownIcon as ChevronDown, CheckCircleIcon as CheckCircle, ClipboardTextIcon as ClipboardText, PackageIcon as Package, ThumbsUpIcon as ThumbsUp, TimerIcon as Timer, UserCheckIcon as UserCheck, UsersIcon as Users, WarningIcon as Warning } from '@phosphor-icons/react';
+import { ArrowsDownUpIcon as ArrowsUpDown, CaretDownIcon as ChevronDown, CheckCircleIcon as CheckCircle, CheckIcon, ClipboardTextIcon as ClipboardText, CurrencyDollarIcon as CurrencyDollar, PackageIcon as Package, ThumbsUpIcon as ThumbsUp, TimerIcon as Timer, UserCheckIcon as UserCheck, UsersIcon as Users, WarningIcon as Warning } from '@phosphor-icons/react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 
@@ -126,7 +126,7 @@ function StatusMultiSelect({ value, onChange }: { value: string[]; onChange: (v:
             }`}
           >
             All Statuses
-            {allSelected && <span className="w-1.5 h-1.5 rounded-full bg-purple-accent flex-shrink-0" />}
+                {allSelected && <CheckIcon size={14} weight="bold" className="text-purple-accent flex-shrink-0" />}
           </button>
           {STATUS_FILTER_OPTIONS_QUICK.map((opt) => {
             const checked = value.includes(opt.value);
@@ -141,7 +141,76 @@ function StatusMultiSelect({ value, onChange }: { value: string[]; onChange: (v:
                 }`}
               >
                 {opt.label}
-                {checked && <span className="w-1.5 h-1.5 rounded-full bg-purple-accent flex-shrink-0" />}
+                    {checked && <CheckIcon size={14} weight="bold" className="text-purple-accent flex-shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function EventMultiSelect({ value, onChange, options }: { value: string[]; onChange: (v: string[]) => void; options: string[] }) {
+  const [open, setOpen] = useState(false);
+  const allSelected = value.length === 0;
+  const label = allSelected
+    ? 'All Events'
+    : value.length === 1
+      ? value[0]
+      : `${value.length} events`;
+
+  function toggle(eventId: string) {
+    if (value.includes(eventId)) {
+      onChange(value.filter((v) => v !== eventId));
+    } else {
+      onChange([...value, eventId]);
+    }
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={`flex items-center h-8 gap-2 px-3 rounded-lg border text-xs font-medium transition-colors bg-card text-foreground ${
+            open ? 'border-ring' : 'border-border hover:border-ring'
+          }`}
+        >
+          {label}
+          <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={6}
+        className="w-auto min-w-[160px] max-h-[300px] overflow-y-auto p-1.5 rounded-xl border-border bg-card"
+      >
+        <div className="flex flex-col">
+          <button
+            onClick={() => onChange([])}
+            className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+              allSelected
+                ? 'bg-muted text-foreground font-medium'
+                : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+            }`}
+          >
+            All Events
+                {allSelected && <CheckIcon size={14} weight="bold" className="text-purple-accent flex-shrink-0" />}
+          </button>
+          {options.map((eventId) => {
+            const checked = value.includes(eventId);
+            return (
+              <button
+                key={eventId}
+                onClick={() => toggle(eventId)}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                  checked
+                    ? 'bg-muted text-foreground font-medium'
+                    : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                {eventId}
+                    {checked && <CheckIcon size={14} weight="bold" className="text-purple-accent flex-shrink-0" />}
               </button>
             );
           })}
@@ -160,7 +229,8 @@ export default function HQReviewsPage() {
   const { actoneOpen } = useHQActOne();
   const { roleFilter, setRoleFilter } = useHQRole();
   const [statusFilter] = useState<string[]>(STATUS_OPTIONS.map((o) => o.value));
-  const [statusQuickFilter, setStatusQuickFilter] = useState<string[]>([]);
+  const [statusQuickFilter, setStatusQuickFilter] = useState<string[]>(['Pending']);
+  const [eventQuickFilter, setEventQuickFilter] = useState<string[]>([]);
   const pendingBadge = theme === 'light'
     ? 'bg-amber-100 text-amber-700 border-amber-300'
     : 'bg-amber-500/15 text-amber-400 border-amber-500/25';
@@ -210,15 +280,18 @@ export default function HQReviewsPage() {
   // currentUser is role-aware: Ian (id u-1) for approver, Shipping Manager for SM, Requester for requester
   const currentUser = roleFilter === 'approver' ? REVIEWER_IAN : roleFilter === 'requester' ? REVIEWER_REQ : REVIEWER_SM;
 
-  const [selected, setSelected] = useState<ReviewRequest>(
-    STATIC_REVIEWS.find((r) => r.assignedTo.id === REVIEWER_IAN.id) ?? STATIC_REVIEWS[0]
-  );
+  const [selected, setSelected] = useState<ReviewRequest | null>(null);
   const [panelPct, setPanelPct] = useState(PANEL_PCT_DEFAULT);
   const panelPctRef = useRef(PANEL_PCT_DEFAULT);
   const containerRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<Toast | null>(null);
 
   const isSparta = workflowFilter === 'sparta-parcel';
+
+  const eventIdOptions = useMemo(() => {
+    const ids = new Set(reviews.filter((r) => r.reqId.startsWith('SHP')).map((r) => r.reqId));
+    return Array.from(ids).sort();
+  }, [reviews]);
 
   const workflowFiltered = useMemo(() => {
     let base: ReviewRequest[];
@@ -232,10 +305,11 @@ export default function HQReviewsPage() {
     const filtered = base.filter((r) =>
       (r.spartaRole == null || r.spartaRole === roleFilter) &&
       statusFilter.includes(r.status) &&
-      (statusQuickFilter.length === 0 || statusQuickFilter.includes(r.status))
+      (statusQuickFilter.length === 0 || statusQuickFilter.includes(r.status)) &&
+      (eventQuickFilter.length === 0 || eventQuickFilter.includes(r.reqId))
     );
     return sortReviews(filtered);
-  }, [reviews, workflowFilter, roleFilter, statusFilter, statusQuickFilter]);
+  }, [reviews, workflowFilter, roleFilter, statusFilter, statusQuickFilter, eventQuickFilter]);
 
   const mineReviews = useMemo(
     () => workflowFiltered.filter((r) => r.assignedTo.id === currentUser.id),
@@ -252,15 +326,29 @@ export default function HQReviewsPage() {
     if (isMobile) setMobileDetailOpen(true);
   }
 
+  const totalPricePerEvent = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of workflowFiltered) {
+      if (!r.reqId.startsWith('SHP')) continue;
+      const price = r.invoice?.price ?? 0;
+      map.set(r.reqId, (map.get(r.reqId) ?? 0) + price);
+    }
+    return map;
+  }, [workflowFiltered]);
+
   // KPIs — Sparta-specific per role, generic otherwise
   const kpiData = useMemo(() => {
+    const totalValue = Array.from(totalPricePerEvent.values()).reduce((sum, v) => sum + v, 0);
+    const totalFmt = `$${Math.round(totalValue).toLocaleString('en-US')}`;
+    const eventCount = totalPricePerEvent.size;
     if (isSparta && roleFilter === 'approver') {
       const pending = mineReviews.filter((r) => r.status === 'Pending').length;
       return [
-        { label: 'Pending',              value: pending, subtext: 'Assigned to me',      icon: UserCheck, valueSuffix: undefined as string | undefined },
-        { label: 'Reviewed',             value: 27,      subtext: 'Decisions made',      icon: Users,     valueSuffix: undefined },
-        { label: 'Avg Response Time',    value: '1.4',   subtext: 'Time to decision',    icon: Timer,     valueSuffix: 'days' },
-        { label: 'Approval Rate',        value: '89%',   subtext: 'Of reviewed parcels', icon: ThumbsUp,  valueSuffix: undefined },
+        { label: 'Pending',              value: pending,   subtext: 'Assigned to me',      icon: UserCheck, valueSuffix: undefined as string | undefined },
+        { label: 'Reviewed',             value: 27,        subtext: 'Decisions made',      icon: Users,     valueSuffix: undefined },
+        { label: 'Avg Response Time',    value: '1.4',     subtext: 'Time to decision',    icon: Timer,     valueSuffix: 'days' },
+        { label: 'Approval Rate',        value: '89%',     subtext: 'Of reviewed parcels', icon: ThumbsUp,  valueSuffix: undefined },
+        { label: 'Total Shipment Value', value: totalFmt,  subtext: `Across ${eventCount} events`, icon: CurrencyDollar, valueSuffix: undefined },
       ];
     }
     if (isSparta && roleFilter === 'shipment-manager') {
@@ -270,6 +358,7 @@ export default function HQReviewsPage() {
         { label: 'Invoices Processed',   value: 41,             subtext: 'Submitted to AP',     icon: CheckCircle,  valueSuffix: undefined },
         { label: 'Avg Variance',         value: '+$3.80',       subtext: 'Estimate vs. actual', icon: ArrowsUpDown, valueSuffix: undefined },
         { label: 'Flagged',              value: 2,              subtext: 'Billing anomalies',   icon: Warning,      valueSuffix: undefined },
+        { label: 'Total Shipment Value', value: totalFmt,       subtext: `Across ${eventCount} events`, icon: CurrencyDollar, valueSuffix: undefined },
       ];
     }
     if (isSparta && roleFilter === 'requester') {
@@ -277,10 +366,11 @@ export default function HQReviewsPage() {
       const submitted = mineReviews.filter((r) => r.status === 'Submitted').length;
       const awaitingApproval = approvalStatusReviews.filter((r) => r.status === 'Pending').length;
       return [
-        { label: 'Pending Review',     value: pending,          subtext: 'Awaiting your decision',   icon: Package,    valueSuffix: undefined as string | undefined },
-        { label: 'Submitted',          value: submitted,        subtext: 'Shipments confirmed',      icon: CheckCircle, valueSuffix: undefined },
-        { label: 'Awaiting Approval',  value: awaitingApproval, subtext: 'Sent to approver',         icon: Timer,       valueSuffix: undefined },
-        { label: 'Discarded',          value: 0,                subtext: 'Shipments cancelled',      icon: Warning,     valueSuffix: undefined },
+        { label: 'Pending Review',       value: pending,          subtext: 'Awaiting your decision',   icon: Package,    valueSuffix: undefined as string | undefined },
+        { label: 'Submitted',            value: submitted,        subtext: 'Shipments confirmed',      icon: CheckCircle, valueSuffix: undefined },
+        { label: 'Awaiting Approval',    value: awaitingApproval, subtext: 'Sent to approver',         icon: Timer,       valueSuffix: undefined },
+        { label: 'Discarded',            value: 0,                subtext: 'Shipments cancelled',      icon: Warning,     valueSuffix: undefined },
+        { label: 'Total Shipment Value', value: totalFmt,         subtext: `Across ${eventCount} events`, icon: CurrencyDollar, valueSuffix: undefined },
       ];
     }
     const awaiting = mineReviews.filter((r) => r.status === 'Pending').length;
@@ -290,7 +380,7 @@ export default function HQReviewsPage() {
       { label: 'Average Response Time',value: '3.2',   subtext: 'Time to decision',     icon: Timer,     valueSuffix: 'days' },
       { label: 'Approval Rate',        value: '84%',   subtext: 'Of my reviewed cases', icon: ThumbsUp,  valueSuffix: undefined },
     ];
-  }, [isSparta, roleFilter, mineReviews, approvalStatusReviews]);
+  }, [isSparta, roleFilter, mineReviews, approvalStatusReviews, totalPricePerEvent]);
 
   const pendingCount = kpiData[0].value as number;
 
@@ -298,7 +388,7 @@ export default function HQReviewsPage() {
     setToast({
       id, message, nextId, commit,
       undo: () => {
-        setSelected((prev) => (prev.id === id ? prevReview : prev));
+        setSelected((prev) => (prev?.id === id ? prevReview : prev));
         setToast(null);
       },
     });
@@ -340,17 +430,17 @@ export default function HQReviewsPage() {
   }, []);
 
   // If selected review is no longer visible (e.g. role switched), fall back to first visible
-  const syncedSelected = visibleReviews.find((r) => r.id === selected.id) ?? visibleReviews[0];
+  const syncedSelected = selected ? (visibleReviews.find((r) => r.id === selected.id) ?? null) : null;
 
   // Role-specific column labels for Sparta Parcel workflows
   const colOverrides = useMemo<ColOverrides | undefined>(() => {
     if (!isSparta) return undefined;
     if (roleFilter === 'approver') {
-      return { reasonLabel: 'Recommendation', sentLabel: 'Submitted' };
+      return { reasonLabel: 'Description', sentLabel: 'Submitted' };
     }
     if (roleFilter === 'requester') {
       /* Approval Status tab shows the budget recommendation column */
-      if (tab === 'approval-status') return { reasonLabel: 'Recommendation', sentLabel: 'Submitted' };
+      if (tab === 'approval-status') return { reasonLabel: 'Description', sentLabel: 'Submitted' };
       return { reasonLabel: null, sentLabel: 'Reason' };
     }
     // shipment-manager: hide reason column, rename sent
@@ -358,16 +448,14 @@ export default function HQReviewsPage() {
   }, [isSparta, roleFilter, tab]);
 
   useEffect(() => {
-    const first = visibleReviews[0];
-    if (first) setSelected(first);
+    setSelected(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   useEffect(() => {
     /* Reset to 'mine' tab when switching away from requester (approval-status is requester-only) */
     if (roleFilter !== 'requester' && tab === 'approval-status') setTab('mine');
-    const first = visibleReviews[0];
-    if (first) setSelected(first);
+    setSelected(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roleFilter]);
 
@@ -380,7 +468,7 @@ export default function HQReviewsPage() {
     const sheetRow = review.requesterShipmentDetail?.processedSheetRow;
     if (!sheetRow) return;
 
-    setSelected((prev) => (prev.id === review.id ? { ...prev, status: 'Submitted' as const } : prev));
+    setSelected((prev) => (prev?.id === review.id ? { ...prev, status: 'Submitted' as const } : prev));
 
     writeResponse.mutate({
       sheetRow,
@@ -399,7 +487,7 @@ export default function HQReviewsPage() {
     const sheetRow = review.requesterShipmentDetail?.processedSheetRow;
     if (!sheetRow) return;
 
-    setSelected((prev) => (prev.id === review.id ? { ...prev, status: 'Discarded' as const } : prev));
+    setSelected((prev) => (prev?.id === review.id ? { ...prev, status: 'Discarded' as const } : prev));
 
     writeResponse.mutate({
       sheetRow,
@@ -417,7 +505,7 @@ export default function HQReviewsPage() {
     const sheetRow = review.approverRecommendation?.processedSheetRow;
     if (!sheetRow) return;
 
-    setSelected((prev) => (prev.id === review.id ? { ...prev, status: 'Approved' as const } : prev));
+    setSelected((prev) => (prev?.id === review.id ? { ...prev, status: 'Approved' as const } : prev));
 
     writeApprover.mutate({
       sheetRow,
@@ -436,7 +524,7 @@ export default function HQReviewsPage() {
     const sheetRow = review.approverRecommendation?.processedSheetRow;
     if (!sheetRow) return;
 
-    setSelected((prev) => (prev.id === review.id ? { ...prev, status: 'Declined' as const } : prev));
+    setSelected((prev) => (prev?.id === review.id ? { ...prev, status: 'Declined' as const } : prev));
 
     writeApprover.mutate({
       sheetRow,
@@ -450,6 +538,10 @@ export default function HQReviewsPage() {
     });
   }
 
+  function handleClosePanel() {
+    setSelected(null);
+  }
+
   function renderDetailPanel(review: ReviewRequest, extraProps?: { width?: number | string; mobile?: boolean; onBack?: () => void }) {
     if (review.spartaRole === 'requester' && review.requesterShipmentDetail) {
       return (
@@ -458,6 +550,7 @@ export default function HQReviewsPage() {
           currentUser={currentUser}
           onSubmit={handleRequesterSubmit}
           onDiscard={handleRequesterDiscard}
+          onClose={handleClosePanel}
           {...extraProps}
         />
       );
@@ -469,6 +562,7 @@ export default function HQReviewsPage() {
           currentUser={currentUser}
           onApprove={handleApproverAccept}
           onReject={handleApproverReject}
+          onClose={handleClosePanel}
           {...extraProps}
         />
       );
@@ -478,15 +572,16 @@ export default function HQReviewsPage() {
         review={review}
         currentUser={currentUser}
         actoneOpen={actoneOpen}
+        onClose={handleClosePanel}
         {...extraProps}
       />
     );
   }
 
   return (
-    <div className={`flex flex-col gap-4 h-full ${isMobile ? 'px-3 pt-3' : 'px-6 pt-4'}`}>
+    <div className={`flex flex-col gap-4 h-full overflow-hidden ${isMobile ? 'px-3 pt-3' : 'px-6 pt-4'}`}>
       {/* KPIs */}
-      <div className={`grid gap-3 ${isMobile ? 'grid-cols-2' : 'grid-cols-4 gap-4'}`}>
+      <div className={`grid gap-3 ${isMobile ? 'grid-cols-2' : 'grid-cols-5 gap-4'}`}>
         {kpiData.map((kpi) => (
           <KPICard
             key={kpi.label}
@@ -507,6 +602,7 @@ export default function HQReviewsPage() {
           <>
             <div className="w-px h-5 bg-border" />
             <StatusMultiSelect value={statusQuickFilter} onChange={setStatusQuickFilter} />
+            <EventMultiSelect value={eventQuickFilter} onChange={setEventQuickFilter} options={eventIdOptions} />
           </>
         )}
         <div className="flex-1" />
@@ -577,22 +673,19 @@ export default function HQReviewsPage() {
           <HumanReviewTable
             reviews={visibleReviews}
             selectedId={syncedSelected?.id ?? null}
-            onSelect={setSelected}
+            onSelect={(r) => setSelected(r)}
             colOverrides={colOverrides}
           />
-          <div
-            onMouseDown={(e) => { e.preventDefault(); startPanelResize(e.clientX); }}
-            className="w-1 flex-shrink-0 cursor-col-resize group relative bg-accent"
-          >
-            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px opacity-0 group-hover:opacity-100 group-hover:w-0.5 bg-blue-400 transition-all" />
-          </div>
-          {syncedSelected ? (
-            renderDetailPanel(syncedSelected, { width: `${panelPct}%` })
-          ) : (
-            <div
-              className="flex-shrink-0 flex-grow-0 h-full border-t border-r border-b-0 border-border rounded-tr-xl bg-muted"
-              style={{ width: `${panelPct}%` }}
-            />
+          {syncedSelected && (
+            <>
+              <div
+                onMouseDown={(e) => { e.preventDefault(); startPanelResize(e.clientX); }}
+                className="w-1 flex-shrink-0 cursor-col-resize group relative bg-accent"
+              >
+                <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px opacity-0 group-hover:opacity-100 group-hover:w-0.5 bg-blue-400 transition-all" />
+              </div>
+              {renderDetailPanel(syncedSelected, { width: `${panelPct}%` })}
+            </>
           )}
           {toast && createPortal(
             <div className="fixed bottom-6 z-[9999]" style={{ right: `calc(${panelPct}% + 28px)` }}>

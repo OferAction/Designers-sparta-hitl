@@ -80,7 +80,7 @@ export default function HQSidebar({ actoneOpen, onActoneToggle, mobileOpen = fal
             src={menuIconUrl}
             alt=""
             aria-hidden="true"
-            className="w-[22px] h-[17px] opacity-70"
+            className="w-[22px] h-[17px] opacity-70 dark:invert"
           />
         </div>
         <TooltipProvider delayDuration={300}>

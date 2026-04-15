@@ -37,9 +37,10 @@ type Col = { key: string; label: string; defaultWidth: number };
 
 const BASE_COLS_DEFAULT: Col[] = [
   { key: 'status',   label: 'Status',        defaultWidth: 130 },
-  { key: 'reason',   label: 'Reason',        defaultWidth: 130 },
+  { key: 'reason',   label: 'Description',   defaultWidth: 130 },
   { key: 'sent',     label: 'Sent to review', defaultWidth: 130 },
-  { key: 'reqId',    label: 'ID',            defaultWidth: 130 },
+  { key: 'reqId',    label: 'Event ID',      defaultWidth: 130 },
+  { key: 'price',    label: 'Price',         defaultWidth: 100 },
 ];
 
 const COL_SORT_KEY: Record<string, (r: ReviewRequest) => string> = {
@@ -47,6 +48,7 @@ const COL_SORT_KEY: Record<string, (r: ReviewRequest) => string> = {
   reason:   (r) => r.reason,
   sent:     (r) => r.sentToReview,
   reqId:    (r) => r.reqId,
+  price:    (r) => String(r.invoice?.price ?? 0).padStart(12, '0'),
 };
 
 const STATUS_OPTIONS: { value: ReviewStatus; label: string }[] = [
@@ -311,7 +313,7 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, onFilt
               className="relative flex items-center gap-1 overflow-hidden cursor-pointer select-none group/col"
             >
               <span
-                className={`text-xs text-foreground/80 font-semibold uppercase tracking-widest truncate ${i > 0 ? 'pl-3' : ''} ${i < COLS.length - 1 ? 'pr-3' : ''}`}
+                className={`text-xs text-foreground/50 font-semibold uppercase tracking-widest truncate ${i > 0 ? 'pl-3' : ''} ${i < COLS.length - 1 ? 'pr-3' : ''}`}
               >
                 {col.label}
               </span>
@@ -379,6 +381,7 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, onFilt
                       <div className="flex items-center justify-between gap-2 text-xs text-foreground/80">
                         <span className="truncate min-w-0">{rev.sentToReview}</span>
                         <span className="flex-shrink-0 w-20 text-center tabular-nums">{rev.reqId}</span>
+                        <span className="flex-shrink-0 w-16 text-right tabular-nums">{rev.invoice?.price != null ? `$${rev.invoice.price.toLocaleString('en-US')}` : '—'}</span>
                       </div>
                     </div>
                   ) : (
@@ -398,6 +401,9 @@ export default function HumanReviewTable({ reviews, selectedId, onSelect, onFilt
                       </div>
                       <div className="flex items-center pl-3 overflow-hidden">
                         <span className="text-sm text-foreground/80 tabular-nums font-medium truncate" title={rev.reqId}>{rev.reqId}</span>
+                      </div>
+                      <div className="flex items-center pl-3 overflow-hidden">
+                        <span className="text-sm text-foreground/80 tabular-nums font-medium truncate">{rev.invoice?.price != null ? `$${rev.invoice.price.toLocaleString('en-US')}` : '—'}</span>
                       </div>
                     </div>
                   )}

@@ -9,6 +9,7 @@ interface Props {
   width?: number | string;
   mobile?: boolean;
   onBack?: () => void;
+  onClose?: () => void;
   onApprove?: (review: ReviewRequest) => void;
   onReject?: (review: ReviewRequest) => void;
 }
@@ -30,7 +31,7 @@ function BudgetBar({ pct }: { pct: number }) {
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
+    <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
       {children}
     </p>
   );
@@ -124,28 +125,43 @@ function ApproverPanel({ review, px, mobile }: { review: ReviewRequest; px: stri
       <div>
         <SectionLabel>Budget Impact</SectionLabel>
         <div className="grid grid-cols-2 gap-3">
-          {[d.budgetImpact.event, d.budgetImpact.annual].map((b, i) => (
-            <div
-              key={i}
-              className="rounded-xl p-3.5"
-              style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)' }}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] font-medium" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
+          {[d.budgetImpact.event, d.budgetImpact.annual].map((b, i) => {
+            const spent = b.current;
+            const total = b.total;
+            const remaining = total - spent;
+            const pct = b.pct;
+            return (
+              <div
+                key={i}
+                className="rounded-xl p-3.5"
+                style={{ background: 'hsl(var(--muted))', border: '1px solid var(--border-subtle)' }}
+              >
+                <p className="text-[11px] font-medium mb-2" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
                   {i === 0 ? 'Event' : 'Annual'} — {b.name}
                 </p>
-                <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{b.pct}%</span>
+                {/* Unified budget bar */}
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Budget</span>
+                  <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>${total.toLocaleString('en-US')}</span>
+                </div>
+                <div className="w-full h-5 rounded-md overflow-hidden relative" style={{ background: 'hsl(var(--background))' }}>
+                  <div
+                    className={`h-full rounded-md ${pct >= 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                    style={{ width: `${Math.min(pct, 100)}%`, transition: 'width 0.4s ease' }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-between px-2">
+                    <span className="text-[10px] font-bold" style={{ color: 'hsl(var(--foreground))' }}>{pct}%</span>
+                    <span className="text-[10px] font-bold" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
+                      ${remaining.toLocaleString('en-US')} left
+                    </span>
+                  </div>
+                </div>
+                <p className="text-[11px] mt-2" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>
+                  After approval: ${b.afterApproval.toLocaleString('en-US')} ({b.afterApprovalPct}%)
+                </p>
               </div>
-              <p className="text-base font-bold leading-tight" style={{ color: 'hsl(var(--foreground))' }}>
-                ${b.current.toLocaleString('en-US')}
-              </p>
-              <p className="text-[11px]" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>of ${b.total.toLocaleString('en-US')}</p>
-              <BudgetBar pct={b.pct} />
-              <p className="text-[11px] mt-2" style={{ color: 'hsl(var(--foreground) / 0.5)' }}>
-                After approval: ${b.afterApproval.toLocaleString('en-US')} ({b.afterApprovalPct}%)
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -304,19 +320,29 @@ function LiveApproverPanel({ rec, px, mobile }: { rec: ApproverRecommendation; p
               <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Department</p>
               <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground) / 0.9)' }}>{ba.deptName ?? '—'}</p>
             </div>
-            <div>
-              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Dept Budget</p>
-              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(ba.deptBudget)}</p>
+          </div>
+          {/* Unified budget bar */}
+          <div className="px-3.5 pb-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[12px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Dept. Budget</p>
+              <p className="text-[12px] font-semibold" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>${fmt(ba.deptBudget)}</p>
             </div>
-            <div>
-              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Remaining</p>
-              <p className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>${fmt(ba.remaining)}</p>
+            <div className="w-full h-6 rounded-lg overflow-hidden relative" style={{ background: 'hsl(var(--background))' }}>
+              <div
+                className={`h-full rounded-lg ${(ba.utilization ?? 0) >= 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                style={{ width: `${Math.min(ba.utilization ?? 0, 100)}%`, transition: 'width 0.4s ease' }}
+              />
+              <div className="absolute inset-0 flex items-center justify-between px-2.5">
+                <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--foreground))' }}>
+                  {ba.utilization ?? 0}% used
+                </span>
+                <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
+                  ${fmt(ba.remaining)} remaining
+                </span>
+              </div>
             </div>
-            <div>
-              <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>Utilization</p>
-              <p className="text-sm" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{ba.utilization ?? 0}%</p>
-              <BudgetBar pct={ba.utilization ?? 0} />
-            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 px-3.5 pb-3">
             <div>
               <p className="text-[12px] font-semibold mb-0.5" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>GL Code</p>
               <p className="text-sm" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>{ba.glCode ?? '—'}</p>
@@ -449,7 +475,7 @@ function ShipmentManagerPanel({ review, px, mobile }: { review: ReviewRequest; p
 }
 
 /** Unified Sparta Parcel detail panel — renders Approver or Shipment Manager view based on review.spartaRole */
-export default function SpartaParcelDetailPanel({ review, currentUser, width = 320, mobile = false, onBack, onApprove, onReject }: Props) {
+export default function SpartaParcelDetailPanel({ review, currentUser, width = 320, mobile = false, onBack, onClose, onApprove, onReject }: Props) {
   const isAssignedToMe = review.assignedTo.id === currentUser.id;
   const canAct = review.status === 'Pending' && isAssignedToMe;
   const px = mobile ? 'px-4' : 'px-5';
@@ -486,12 +512,23 @@ export default function SpartaParcelDetailPanel({ review, currentUser, width = 3
       {/* Header */}
       <div className={`${px} py-4 flex-shrink-0`} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-bold text-base leading-snug" style={{ color: 'hsl(var(--foreground) / 0.8)' }}>
-            {title}
-          </h3>
-          <div className="flex-shrink-0 mt-0.5">
-            <StatusBadge status={review.status} />
+          <div className="flex items-center gap-4 min-w-0">
+            <h3 className="font-bold text-base leading-snug truncate" style={{ color: 'hsl(var(--foreground) / 0.8)' }}>
+              {title}
+            </h3>
+            <div className="flex-shrink-0">
+              <StatusBadge status={review.status} />
+            </div>
           </div>
+          {!mobile && onClose && (
+            <button
+              onClick={onClose}
+              className="flex-shrink-0 mt-0.5 p-1 rounded-md transition-colors hover:bg-muted"
+              style={{ color: 'hsl(var(--foreground) / 0.5)' }}
+            >
+              <XIcon size={16} weight="bold" />
+            </button>
+          )}
         </div>
         <p className="text-xs mt-1.5" style={{ color: 'hsl(var(--foreground) / 0.55)' }}>{subtitle}</p>
       </div>

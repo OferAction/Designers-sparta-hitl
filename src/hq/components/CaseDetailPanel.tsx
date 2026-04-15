@@ -13,6 +13,7 @@ interface Props {
     width?: number | string;
     mobile?: boolean;
     onBack?: () => void;
+    onClose?: () => void;
     actoneOpen?: boolean;
 }
 
@@ -39,7 +40,7 @@ function BoldNames({ text }: { text: string }) {
 }
 
 /** Case detail side panel — FYI-only flow for "Notify & end execution" reviews */
-export default function CaseDetailPanel({ review, currentUser, width = 320, mobile = false, onBack, actoneOpen = false }: Props) {
+export default function CaseDetailPanel({ review, currentUser, width = 320, mobile = false, onBack, onClose, actoneOpen = false }: Props) {
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const { blurActOneInput } = useHQActOne();
     void blurActOneInput;
@@ -100,23 +101,34 @@ export default function CaseDetailPanel({ review, currentUser, width = 320, mobi
                 {/* Header */}
                 <div className={`${px} py-4`}>
                     <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <h3 className="font-bold text-base leading-snug truncate" style={{ color: 'hsl(var(--foreground) / 0.8)' }}>
-                                            {reviewContent?.subjectDescription ?? review.reason}
-                                        </h3>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom">{reviewContent?.subjectDescription ?? review.reason}</TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                            <div className="min-w-0 flex-1">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <h3 className="font-bold text-base leading-snug truncate" style={{ color: 'hsl(var(--foreground) / 0.8)' }}>
+                                                {reviewContent?.subjectDescription ?? review.reason}
+                                            </h3>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom">{reviewContent?.subjectDescription ?? review.reason}</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                            <div className="flex-shrink-0">
+                                <StatusBadge status={review.status} />
+                            </div>
                         </div>
-                        <div className="flex-shrink-0 mt-0.5">
-                            <StatusBadge status={review.status} />
-                        </div>
+                        {!mobile && onClose && (
+                            <button
+                                onClick={onClose}
+                                className="flex-shrink-0 mt-0.5 p-1 rounded-md transition-colors hover:bg-muted"
+                                style={{ color: 'hsl(var(--foreground) / 0.5)' }}
+                            >
+                                <XIcon size={16} weight="bold" />
+                            </button>
+                        )}
                     </div>
-                    <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
+                    <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'hsl(var(--foreground) / 0.6)', paddingLeft: 'calc(16px + 1rem)' }}>
                         Notify &amp; End Execution
                     </p>
                 </div>

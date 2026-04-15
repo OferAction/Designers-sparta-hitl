@@ -15,7 +15,8 @@ import type { HQNotification, NotificationKind, SpartaRole } from '@/hq/types';
 import { useIsMobile } from '@/hq/hooks/useIsMobile';
 import logoDarkUrl from '@/assets/actionhq-logo-dark.svg';
 import logoLightUrl from '@/assets/actionhq-logo-light.svg';
-import spartanLogoUrl from '@/assets/spartan logo.png';
+import spartanLogoDarkUrl from '@/assets/spartan-logo-darkmode.png';
+import spartanLogoLightUrl from '@/assets/spartan-logo-lightmode.png';
 import { workflowOverviews } from '@/hq/data/mockData';
 import { useHQRole } from '@/hq/context';
 
@@ -367,7 +368,7 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
                 className="w-full h-auto"
               />
             </div>
-            <img src={spartanLogoUrl} alt="Spartan" style={{ height: '32px', width: 'auto', marginLeft: '12px', flexShrink: 0 }} />
+            <img src={theme === 'dark' ? spartanLogoDarkUrl : spartanLogoLightUrl} alt="Spartan" style={{ height: '24px', width: 'auto', marginLeft: '12px', flexShrink: 0 }} />
           </div>
 
           {/* Filter + avatar */}
@@ -431,7 +432,7 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
         alt="ActionHQ"
         style={{ height: '22px', width: 'auto', maxWidth: 'none', flexShrink: 0 }}
       />
-      <img src={spartanLogoUrl} alt="Spartan" style={{ height: '32px', width: 'auto', flexShrink: 0, marginLeft: '12px' }} />
+      <img src={theme === 'dark' ? spartanLogoDarkUrl : spartanLogoLightUrl} alt="Spartan" style={{ height: '24px', width: 'auto', flexShrink: 0, marginLeft: '12px' }} />
       <div className="flex-1" />
       <div className="flex items-center gap-2">
         <span className="text-sm text-foreground/80">System health:</span>
@@ -442,6 +443,8 @@ export default function HQTopBar({ onMenuOpen }: TopBarProps) {
       </div>
       <div className="w-px h-5 bg-border" />
       <HQDropdown options={WORKFLOW_OPTIONS} paramKey="workflow" defaultValue="sparta-parcel" maxWidth="190px" />
+      <div className="w-px h-5 bg-border" />
+      <HQDropdown options={DATE_OPTIONS} paramKey="date" defaultValue="30d" maxWidth="160px" />
 
       <div className="w-px h-5 bg-border" />
 

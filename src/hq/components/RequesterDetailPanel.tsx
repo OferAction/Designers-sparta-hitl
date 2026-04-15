@@ -21,6 +21,7 @@ interface Props {
   width?: number | string;
   mobile?: boolean;
   onBack?: () => void;
+  onClose?: () => void;
   onSubmit?: (review: ReviewRequest, selectedOption: ShippingOption) => void;
   onDiscard?: (review: ReviewRequest) => void;
 }
@@ -130,7 +131,7 @@ function ShippingOptionCard({
 }
 
 /** Detail panel for the Requester role — review proposed shipment from _processed sheet */
-export default function RequesterDetailPanel({ review, currentUser, width = 320, mobile = false, onBack, onSubmit, onDiscard }: Props) {
+export default function RequesterDetailPanel({ review, currentUser, width = 320, mobile = false, onBack, onClose, onSubmit, onDiscard }: Props) {
   const d = review.requesterShipmentDetail;
 
   const [selectedOption, setSelectedOption] = useState<ShippingOption>(d?.selection?.selected ?? {} as ShippingOption);
@@ -181,12 +182,23 @@ export default function RequesterDetailPanel({ review, currentUser, width = 320,
       {/* Header */}
       <div className={`${px} py-4 flex-shrink-0`} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-bold text-base leading-snug" style={{ color: 'hsl(var(--foreground) / 0.8)' }}>
-            Shipment review — {review.reqId}
-          </h3>
-          <div className="flex-shrink-0 mt-0.5">
-            <StatusBadge status={review.status} />
+          <div className="flex items-center gap-4 min-w-0">
+            <h3 className="font-bold text-base leading-snug truncate" style={{ color: 'hsl(var(--foreground) / 0.8)' }}>
+              Shipment review — {review.reqId}
+            </h3>
+            <div className="flex-shrink-0">
+              <StatusBadge status={review.status} />
+            </div>
           </div>
+          {!mobile && onClose && (
+            <button
+              onClick={onClose}
+              className="flex-shrink-0 mt-0.5 p-1 rounded-md transition-colors hover:bg-muted"
+              style={{ color: 'hsl(var(--foreground) / 0.5)' }}
+            >
+              <XIcon size={16} weight="bold" />
+            </button>
+          )}
         </div>
         <p className="text-xs mt-1.5" style={{ color: 'hsl(var(--foreground) / 0.55)' }}>
           Review proposed shipment and confirm or select an alternative
